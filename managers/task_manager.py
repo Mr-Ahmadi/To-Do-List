@@ -1,5 +1,3 @@
-# managers/task_manager.py
-
 from typing import List, Optional
 from datetime import datetime
 from models.project import Project

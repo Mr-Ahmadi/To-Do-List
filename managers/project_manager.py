@@ -1,5 +1,3 @@
-# managers/project_manager.py
-
 from typing import List, Optional
 from models.project import Project
 from models.task import Task
