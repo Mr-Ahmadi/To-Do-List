@@ -5,9 +5,9 @@ description = "A command-line To-Do List application built with Python OOP"
 authors = ["Ali Ahmadi <mr-ahmadi2004@outlook.com>"]
 readme = "README.md"
 license = "MIT"
-homepage = "https://github.com/yourusername/todolist-app"
-repository = "https://github.com/yourusername/todolist-app"
-documentation = "https://github.com/yourusername/todolist-app/docs"
+homepage = "https://github.com/Mr-Ahmadi/To-Do-List"
+repository = "https://github.com/Mr-Ahmadi/To-Do-List"
+documentation = "https://github.com/Mr-Ahmadi/To-Do-List"
 keywords = ["todo", "todolist", "cli", "task-manager"]
 classifiers = [
     "Development Status :: 3 - Alpha",
