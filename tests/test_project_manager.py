@@ -14,6 +14,12 @@ from todolist_app.utils.config import Config
 class TestProjectManager:
     """Test cases for ProjectManager class."""
 
+    @pytest.fixture(autouse=True)
+    def reset_ids(self):
+        """Reset ID counters before each test."""
+        ProjectManager.reset_id_counter()
+        yield
+
     def test_create_project_success(self):
         """Test successful project creation."""
         manager = ProjectManager()
@@ -26,11 +32,13 @@ class TestProjectManager:
         assert len(manager.projects) == 1
 
     def test_create_project_invalid_name(self):
-        """Test project creation with invalid name."""
+        """Test project creation with invalid name (exceeds 30 words)."""
         manager = ProjectManager()
+        # Create a name with more than 30 words
+        long_name = " ".join(["word"] * 31)
         with pytest.raises(ValidationException):
             manager.create_project(
-                "Short", "This is a test project description with enough words"
+                long_name, "This is a test project description with enough words"
             )
 
     def test_create_project_duplicate_name(self):
@@ -137,3 +145,19 @@ class TestProjectManager:
         results = manager.search_projects("Python")
         assert len(results) == 1
         assert results[0].name == "Python Project"
+
+    def test_create_project_with_optional_description(self):
+        """Test project creation with optional description."""
+        manager = ProjectManager()
+        # Empty description should be valid (optional)
+        project = manager.create_project("Test Project", "")
+        assert project.name == "Test Project"
+        assert project.description == ""
+
+    def test_create_project_with_none_description(self):
+        """Test project creation with None description."""
+        manager = ProjectManager()
+        # None description should be valid (optional)
+        project = manager.create_project("Test Project", None)
+        assert project.name == "Test Project"
+        assert project.description is None or project.description == ""

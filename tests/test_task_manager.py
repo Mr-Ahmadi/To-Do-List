@@ -28,6 +28,12 @@ class TestTaskManager:
         """Create a TaskManager with test project."""
         return TaskManager(project)
 
+    @pytest.fixture(autouse=True)
+    def reset_ids(self):
+        """Reset ID counters before each test."""
+        TaskManager.reset_id_counter()
+        yield
+
     def test_create_task_success(self, task_manager):
         """Test successful task creation."""
         task = task_manager.create_task(
@@ -52,10 +58,12 @@ class TestTaskManager:
         assert task.deadline is not None
 
     def test_create_task_invalid_title(self, task_manager):
-        """Test task creation with invalid title."""
+        """Test task creation with invalid title (exceeds 30 words)."""
+        # Create a title with more than 30 words
+        long_title = " ".join(["word"] * 31)
         with pytest.raises(ValidationException):
             task_manager.create_task(
-                "Short", "This is a detailed task description with enough words"
+                long_title, "This is a detailed task description with enough words"
             )
 
     def test_create_task_max_limit(self, task_manager, monkeypatch):
@@ -107,14 +115,21 @@ class TestTaskManager:
             "Todo Task", "This is a todo task description", status="todo"
         )
         task_manager.create_task(
-            "Progress Task",
-            "This is an in progress task description",
-            status="in_progress",
+            "Doing Task",
+            "This is a doing task description",
+            status="doing",  # ✅ Changed from 'in_progress'
+        )
+        task_manager.create_task(
+            "Done Task", "This is a done task description", status="done"
         )
 
         todo_tasks = task_manager.get_tasks_by_status("todo")
         assert len(todo_tasks) == 1
         assert todo_tasks[0].status == "todo"
+
+        doing_tasks = task_manager.get_tasks_by_status("doing")
+        assert len(doing_tasks) == 1
+        assert doing_tasks[0].status == "doing"
 
     def test_update_task_success(self, task_manager):
         """Test successful task update."""
@@ -181,3 +196,30 @@ class TestTaskManager:
 
         overdue = task_manager.get_overdue_tasks()
         assert len(overdue) == 1
+
+    def test_invalid_status(self, task_manager):
+        """Test creating task with invalid status."""
+        with pytest.raises(InvalidStatusException):
+            task_manager.create_task(
+                "Test Task",
+                "This is a test task description",
+                status="invalid_status"
+            )
+
+    def test_all_valid_statuses(self, task_manager):
+        """Test creating tasks with all valid statuses."""
+        # Test all valid statuses: todo, doing, done
+        task1 = task_manager.create_task(
+            "Todo Task", "Description", status="todo"
+        )
+        assert task1.status == "todo"
+
+        task2 = task_manager.create_task(
+            "Doing Task", "Description", status="doing"
+        )
+        assert task2.status == "doing"
+
+        task3 = task_manager.create_task(
+            "Done Task", "Description", status="done"
+        )
+        assert task3.status == "done"
