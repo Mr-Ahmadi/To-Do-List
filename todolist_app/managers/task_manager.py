@@ -27,8 +27,10 @@ class TaskManager:
 
     Attributes:
         project (Project): The project this manager is associated with
-        next_id (int): Counter for generating unique task IDs
+        _next_id (int): Class-level counter for generating unique task IDs
     """
+
+    _next_id: int = 1  # ✅ Changed to class variable
 
     def __init__(self, project: Project):
         """
@@ -38,7 +40,27 @@ class TaskManager:
             project (Project): The project to manage tasks for
         """
         self.project = project
-        self.next_id: int = 1
+
+    @classmethod
+    def _get_next_id(cls) -> int:
+        """
+        Get the next available task ID and increment the counter.
+
+        Returns:
+            int: The next task ID
+        """
+        current_id = cls._next_id
+        cls._next_id += 1
+        return current_id
+
+    @classmethod
+    def reset_id_counter(cls) -> None:
+        """
+        Reset the task ID counter to 1.
+        
+        This method is primarily used for testing purposes.
+        """
+        cls._next_id = 1
 
     def create_task(
         self,
@@ -79,9 +101,9 @@ class TaskManager:
         # Validate and parse deadline
         deadline_dt = Validator.validate_deadline(deadline)
 
-        # Create task
+        # Create task with unique ID
         task = Task(
-            id=self.next_id,
+            id=self._get_next_id(),  # ✅ Use class method instead of self.next_id
             title=title,
             description=description,
             project_id=self.project.id,
@@ -90,7 +112,6 @@ class TaskManager:
         )
 
         self.project.tasks.append(task)
-        self.next_id += 1
 
         return task
 

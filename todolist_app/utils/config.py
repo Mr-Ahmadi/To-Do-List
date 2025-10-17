@@ -26,19 +26,21 @@ class Config:
     MAX_NUMBER_OF_PROJECT: int = int(os.getenv("MAX_NUMBER_OF_PROJECT", "10"))
     MAX_NUMBER_OF_TASK: int = int(os.getenv("MAX_NUMBER_OF_TASK", "50"))
 
-    # Word count limits for validation
-    PROJECT_NAME_MIN_WORDS: int = 2
-    PROJECT_NAME_MAX_WORDS: int = 4
-    PROJECT_DESCRIPTION_MIN_WORDS: int = 5
-    PROJECT_DESCRIPTION_MAX_WORDS: int = 30
+    # Word count limits for validation (based on PDF requirements)
+    # Project validation
+    PROJECT_NAME_MIN_WORDS: int = 1      # ✅ Minimum 1 word
+    PROJECT_NAME_MAX_WORDS: int = 30     # ✅ Maximum 30 words
+    PROJECT_DESCRIPTION_MIN_WORDS: int = 0  # ✅ Optional (0 = optional)
+    PROJECT_DESCRIPTION_MAX_WORDS: int = 150  # ✅ Maximum 150 words
 
-    TASK_TITLE_MIN_WORDS: int = 2
-    TASK_TITLE_MAX_WORDS: int = 8
-    TASK_DESCRIPTION_MIN_WORDS: int = 5
-    TASK_DESCRIPTION_MAX_WORDS: int = 50
+    # Task validation
+    TASK_TITLE_MIN_WORDS: int = 1        # ✅ Minimum 1 word
+    TASK_TITLE_MAX_WORDS: int = 30       # ✅ Maximum 30 words
+    TASK_DESCRIPTION_MIN_WORDS: int = 1  # ✅ Required (min 1 word)
+    TASK_DESCRIPTION_MAX_WORDS: int = 150  # ✅ Maximum 150 words
 
-    # Valid task statuses
-    VALID_STATUSES: List[str] = ["todo", "in_progress", "done"]
+    # Valid task statuses (from PDF: todo | doing | done)
+    VALID_STATUSES: List[str] = ["todo", "doing", "done"]  # ✅ Correct statuses
 
     # Application settings
     APP_ENV: str = os.getenv("APP_ENV", "development")
@@ -93,3 +95,43 @@ class Config:
             str: Current environment (development/production/testing)
         """
         return cls.APP_ENV
+
+    @classmethod
+    def get_project_name_limits(cls) -> tuple[int, int]:
+        """
+        Get project name word limits.
+
+        Returns:
+            tuple[int, int]: (min_words, max_words)
+        """
+        return (cls.PROJECT_NAME_MIN_WORDS, cls.PROJECT_NAME_MAX_WORDS)
+
+    @classmethod
+    def get_project_description_limits(cls) -> tuple[int, int]:
+        """
+        Get project description word limits.
+
+        Returns:
+            tuple[int, int]: (min_words, max_words)
+        """
+        return (cls.PROJECT_DESCRIPTION_MIN_WORDS, cls.PROJECT_DESCRIPTION_MAX_WORDS)
+
+    @classmethod
+    def get_task_title_limits(cls) -> tuple[int, int]:
+        """
+        Get task title word limits.
+
+        Returns:
+            tuple[int, int]: (min_words, max_words)
+        """
+        return (cls.TASK_TITLE_MIN_WORDS, cls.TASK_TITLE_MAX_WORDS)
+
+    @classmethod
+    def get_task_description_limits(cls) -> tuple[int, int]:
+        """
+        Get task description word limits.
+
+        Returns:
+            tuple[int, int]: (min_words, max_words)
+        """
+        return (cls.TASK_DESCRIPTION_MIN_WORDS, cls.TASK_DESCRIPTION_MAX_WORDS)

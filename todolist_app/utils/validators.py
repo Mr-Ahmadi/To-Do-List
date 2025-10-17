@@ -1,8 +1,8 @@
 """
-Validators module for the ToDoList application.
+Validator utilities for the ToDoList application.
 
-This module provides validation functions for user inputs including
-word count validation, status validation, and date validation.
+This module provides validation functions for various input types
+including project names, task titles, descriptions, dates, and statuses.
 """
 
 from datetime import datetime
@@ -13,54 +13,23 @@ from todolist_app.exceptions.custom_exceptions import (
     InvalidStatusException,
     ValidationException,
 )
-from todolist_app.utils.config import Config
 
 
 class Validator:
-    """
-    Validator class containing static methods for input validation.
+    """Validator class for input validation."""
 
-    This class provides various validation methods to ensure data
-    integrity throughout the application.
-    """
+    # Valid task statuses
+    VALID_STATUSES = ["todo", "doing", "done"]
 
-    @staticmethod
-    def validate_word_count(
-        text: str, min_words: int, max_words: int, field_name: str
-    ) -> None:
-        """
-        Validate that text contains an acceptable number of words.
-
-        Args:
-            text (str): Text to validate
-            min_words (int): Minimum number of words required
-            max_words (int): Maximum number of words allowed
-            field_name (str): Name of the field being validated (for error messages)
-
-        Raises:
-            ValidationException: If word count is outside the acceptable range
-        """
-        if not text or not text.strip():
-            raise ValidationException(f"{field_name} cannot be empty.")
-
-        word_count = len(text.split())
-
-        if word_count < min_words:
-            raise ValidationException(
-                f"{field_name} must contain at least {min_words} words. "
-                f"Current: {word_count} words."
-            )
-
-        if word_count > max_words:
-            raise ValidationException(
-                f"{field_name} must not exceed {max_words} words. "
-                f"Current: {word_count} words."
-            )
+    # Word limits
+    MAX_NAME_WORDS = 30
+    MIN_NAME_WORDS = 1  # ✅ Minimum 1 word for names
+    MAX_DESCRIPTION_WORDS = 150
 
     @staticmethod
     def validate_project_name(name: str) -> None:
         """
-        Validate project name according to defined rules.
+        Validate project name.
 
         Args:
             name (str): Project name to validate
@@ -68,17 +37,26 @@ class Validator:
         Raises:
             ValidationException: If validation fails
         """
-        Validator.validate_word_count(
-            name,
-            Config.PROJECT_NAME_MIN_WORDS,
-            Config.PROJECT_NAME_MAX_WORDS,
-            "Project name",
-        )
+        if not name or not name.strip():
+            raise ValidationException("Project name cannot be empty.")
+
+        word_count = len(name.strip().split())
+        
+        if word_count < Validator.MIN_NAME_WORDS:
+            raise ValidationException(
+                f"Project name must contain at least {Validator.MIN_NAME_WORDS} word."
+            )
+
+        if word_count > Validator.MAX_NAME_WORDS:
+            raise ValidationException(
+                f"Project name cannot exceed {Validator.MAX_NAME_WORDS} words. "
+                f"Current: {word_count} words."
+            )
 
     @staticmethod
     def validate_project_description(description: str) -> None:
         """
-        Validate project description according to defined rules.
+        Validate project description.
 
         Args:
             description (str): Project description to validate
@@ -86,17 +64,23 @@ class Validator:
         Raises:
             ValidationException: If validation fails
         """
-        Validator.validate_word_count(
-            description,
-            Config.PROJECT_DESCRIPTION_MIN_WORDS,
-            Config.PROJECT_DESCRIPTION_MAX_WORDS,
-            "Project description",
-        )
+        # ✅ Description is optional - empty string is valid
+        if description is None:
+            return
+
+        # If provided, check word limit
+        if description.strip():
+            word_count = len(description.strip().split())
+            if word_count > Validator.MAX_DESCRIPTION_WORDS:
+                raise ValidationException(
+                    f"Project description cannot exceed {Validator.MAX_DESCRIPTION_WORDS} words. "
+                    f"Current: {word_count} words."
+                )
 
     @staticmethod
     def validate_task_title(title: str) -> None:
         """
-        Validate task title according to defined rules.
+        Validate task title.
 
         Args:
             title (str): Task title to validate
@@ -104,17 +88,26 @@ class Validator:
         Raises:
             ValidationException: If validation fails
         """
-        Validator.validate_word_count(
-            title,
-            Config.TASK_TITLE_MIN_WORDS,
-            Config.TASK_TITLE_MAX_WORDS,
-            "Task title",
-        )
+        if not title or not title.strip():
+            raise ValidationException("Task title cannot be empty.")
+
+        word_count = len(title.strip().split())
+        
+        if word_count < Validator.MIN_NAME_WORDS:
+            raise ValidationException(
+                f"Task title must contain at least {Validator.MIN_NAME_WORDS} word."
+            )
+
+        if word_count > Validator.MAX_NAME_WORDS:
+            raise ValidationException(
+                f"Task title cannot exceed {Validator.MAX_NAME_WORDS} words. "
+                f"Current: {word_count} words."
+            )
 
     @staticmethod
     def validate_task_description(description: str) -> None:
         """
-        Validate task description according to defined rules.
+        Validate task description.
 
         Args:
             description (str): Task description to validate
@@ -122,88 +115,80 @@ class Validator:
         Raises:
             ValidationException: If validation fails
         """
-        Validator.validate_word_count(
-            description,
-            Config.TASK_DESCRIPTION_MIN_WORDS,
-            Config.TASK_DESCRIPTION_MAX_WORDS,
-            "Task description",
-        )
+        # ✅ Task description is still required
+        if not description or not description.strip():
+            raise ValidationException("Task description cannot be empty.")
+
+        word_count = len(description.strip().split())
+
+        if word_count > Validator.MAX_DESCRIPTION_WORDS:
+            raise ValidationException(
+                f"Task description cannot exceed {Validator.MAX_DESCRIPTION_WORDS} words. "
+                f"Current: {word_count} words."
+            )
 
     @staticmethod
     def validate_status(status: str) -> None:
         """
-        Validate that the provided status is valid.
+        Validate task status.
 
         Args:
             status (str): Status to validate
 
         Raises:
-            InvalidStatusException: If status is not in the valid statuses list
+            InvalidStatusException: If status is invalid
         """
-        valid_statuses = Config.get_valid_statuses()
-        if status not in valid_statuses:
+        if status not in Validator.VALID_STATUSES:
             raise InvalidStatusException(
                 f"Invalid status: '{status}'. "
-                f"Valid statuses are: {', '.join(valid_statuses)}"
+                f"Valid statuses are: {', '.join(Validator.VALID_STATUSES)}"
             )
 
     @staticmethod
-    def validate_deadline(deadline_str: Optional[str]) -> Optional[datetime]:
+    def validate_deadline(deadline: Optional[str]) -> Optional[datetime]:
         """
         Validate and parse deadline string.
 
         Args:
-            deadline_str (Optional[str]): Deadline string in YYYY-MM-DD format
+            deadline (Optional[str]): Deadline string in YYYY-MM-DD format
 
         Returns:
-            Optional[datetime]: Parsed datetime object or None if no deadline
+            Optional[datetime]: Parsed datetime object or None
 
         Raises:
-            InvalidDateException: If date format is invalid or date is in the past
+            InvalidDateException: If date format is invalid
         """
-        if not deadline_str or deadline_str.strip().lower() in ["none", "", "no"]:
+        if deadline is None or deadline.strip() == "":
             return None
 
         try:
-            deadline = datetime.strptime(deadline_str.strip(), "%Y-%m-%d")
+            # Parse the date string
+            deadline_dt = datetime.strptime(deadline.strip(), "%Y-%m-%d")
+            return deadline_dt
         except ValueError:
             raise InvalidDateException(
-                f"Invalid date format: '{deadline_str}'. "
-                f"Please use YYYY-MM-DD format (e.g., 2025-12-31)."
+                f"Invalid date format: '{deadline}'. "
+                f"Expected format: YYYY-MM-DD (e.g., 2024-12-31)"
             )
-
-        # Check if deadline is in the future
-        if deadline.date() < datetime.now().date():
-            raise InvalidDateException(
-                f"Deadline cannot be in the past. "
-                f"Provided date: {deadline_str}"
-            )
-
-        return deadline
 
     @staticmethod
-    def validate_positive_integer(value: str, field_name: str) -> int:
+    def validate_id(entity_id: int, entity_type: str = "entity") -> None:
         """
-        Validate that a string represents a positive integer.
+        Validate entity ID.
 
         Args:
-            value (str): String to validate
-            field_name (str): Name of the field being validated
-
-        Returns:
-            int: Validated integer value
+            entity_id (int): ID to validate
+            entity_type (str): Type of entity for error message
 
         Raises:
-            ValidationException: If value is not a positive integer
+            ValidationException: If ID is invalid
         """
-        try:
-            num = int(value)
-            if num <= 0:
-                raise ValidationException(
-                    f"{field_name} must be a positive integer. Provided: {value}"
-                )
-            return num
-        except ValueError:
+        if not isinstance(entity_id, int):
             raise ValidationException(
-                f"{field_name} must be a valid integer. Provided: {value}"
+                f"{entity_type.capitalize()} ID must be an integer."
+            )
+
+        if entity_id < 1:
+            raise ValidationException(
+                f"{entity_type.capitalize()} ID must be a positive integer."
             )
