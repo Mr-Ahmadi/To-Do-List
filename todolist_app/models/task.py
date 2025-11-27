@@ -1,87 +1,98 @@
 """
-Task model for the ToDoList application.
+Task model for the ToDoList application with SQLAlchemy ORM support.
 
-This module defines the Task class which represents a task entity
-within a project.
+This module defines the Task entity for database storage using SQLAlchemy ORM.
 """
 
 from datetime import datetime
 from typing import Optional
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum as SQLEnum
+from sqlalchemy.orm import relationship
+import enum
+
+from todolist_app.db import Base
 
 
-class Task:
+class TaskStatus(enum.Enum):
     """
-    Represents a task in the ToDoList system.
+    Enumeration of possible task statuses.
+    
+    Attributes:
+        TODO: Task is pending and not yet started
+        IN_PROGRESS: Task is currently being worked on
+        DONE: Task has been completed
+        OVERDUE: Task has passed its deadline without completion
+    """
+    TODO = "todo"
+    IN_PROGRESS = "in_progress"
+    DONE = "done"
+    OVERDUE = "overdue"
+
+
+class Task(Base):
+    """
+    Represents a task in the ToDoList system (ORM Entity).
 
     A task belongs to a project and contains details about a specific
     work item including title, description, deadline, and status.
+    This class uses SQLAlchemy ORM for database persistence.
 
     Attributes:
-        id (int): Unique identifier for the task
+        id (int): Unique identifier for the task (auto-generated)
         title (str): Title of the task
         description (str): Detailed description of the task
-        project_id (int): ID of the project this task belongs to
+        status (TaskStatus): Current status of the task
         deadline (Optional[datetime]): Optional deadline for the task
-        status (str): Current status of the task (todo/in_progress/done)
         created_at (datetime): Timestamp when the task was created
         updated_at (datetime): Timestamp when the task was last updated
+        closed_at (Optional[datetime]): Timestamp when the task was marked as done
+        project_id (int): Foreign key referencing the parent project
+        project (Project): Relationship to parent project
     """
-
-    def __init__(
-        self,
-        id: int,
-        title: str,
-        description: str,
-        project_id: int,
-        deadline: Optional[datetime] = None,
-        status: str = "todo",
-    ):
+    
+    __tablename__ = "tasks"
+    
+    # Primary key
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    
+    # Task details
+    title = Column(String(500), nullable=False)
+    description = Column(String(2000), nullable=False)
+    status = Column(SQLEnum(TaskStatus), default=TaskStatus.TODO, nullable=False)
+    deadline = Column(DateTime, nullable=True)
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(
+        DateTime, 
+        default=datetime.utcnow, 
+        onupdate=datetime.utcnow, 
+        nullable=False
+    )
+    closed_at = Column(DateTime, nullable=True)
+    
+    # Foreign key to Project
+    project_id = Column(
+        Integer, 
+        ForeignKey('projects.id', ondelete='CASCADE'), 
+        nullable=False
+    )
+    
+    # Relationship with Project
+    project = relationship("Project", back_populates="tasks")
+    
+    def __repr__(self) -> str:
         """
-        Initialize a new Task instance.
+        Return developer-friendly representation of the task.
 
-        Args:
-            id (int): Unique identifier for the task
-            title (str): Title of the task
-            description (str): Detailed description of the task
-            project_id (int): ID of the project this task belongs to
-            deadline (Optional[datetime]): Optional deadline for the task
-            status (str): Initial status of the task (default: 'todo')
+        Returns:
+            str: String representation for debugging
         """
-        self.id = id
-        self.title = title
-        self.description = description
-        self.project_id = project_id
-        self.deadline = deadline
-        self.status = status
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
-
-    def update(
-        self,
-        title: str = None,
-        description: str = None,
-        deadline: Optional[datetime] = None,
-        status: str = None,
-    ) -> None:
-        """
-        Update task details.
-
-        Args:
-            title (str, optional): New title for the task
-            description (str, optional): New description for the task
-            deadline (Optional[datetime], optional): New deadline for the task
-            status (str, optional): New status for the task
-        """
-        if title is not None:
-            self.title = title
-        if description is not None:
-            self.description = description
-        if deadline is not None:
-            self.deadline = deadline
-        if status is not None:
-            self.status = status
-        self.updated_at = datetime.now()
-
+        return (
+            f"Task(id={self.id}, title='{self.title}', "
+            f"status='{self.status.value}', project_id={self.project_id})"
+        )
+    
     def __str__(self) -> str:
         """
         Return string representation of the task.
@@ -92,24 +103,37 @@ class Task:
         deadline_str = (
             self.deadline.strftime("%Y-%m-%d") if self.deadline else "No deadline"
         )
+        closed_str = (
+            self.closed_at.strftime("%Y-%m-%d %H:%M:%S") 
+            if self.closed_at else "Not completed"
+        )
+        
         return (
             f"Task ID: {self.id}\n"
             f"Title: {self.title}\n"
             f"Description: {self.description}\n"
-            f"Status: {self.status}\n"
+            f"Status: {self.status.value}\n"
             f"Deadline: {deadline_str}\n"
             f"Created: {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}\n"
-            f"Updated: {self.updated_at.strftime('%Y-%m-%d %H:%M:%S')}"
+            f"Updated: {self.updated_at.strftime('%Y-%m-%d %H:%M:%S')}\n"
+            f"Closed: {closed_str}"
         )
-
-    def __repr__(self) -> str:
+    
+    def to_dict(self) -> dict:
         """
-        Return developer-friendly representation of the task.
-
+        Convert task to dictionary representation.
+        
         Returns:
-            str: String representation for debugging
+            dict: Dictionary containing all task attributes
         """
-        return (
-            f"Task(id={self.id}, title='{self.title}', "
-            f"status='{self.status}', project_id={self.project_id})"
-        )
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'status': self.status.value,
+            'deadline': self.deadline.isoformat() if self.deadline else None,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat(),
+            'closed_at': self.closed_at.isoformat() if self.closed_at else None,
+            'project_id': self.project_id
+        }

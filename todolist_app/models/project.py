@@ -1,60 +1,63 @@
 """
-Project model for the ToDoList application.
+Project model for the ToDoList application with SQLAlchemy ORM support.
 
-This module defines the Project class which represents a project entity
-containing multiple tasks.
+This module defines the Project entity for database storage using SQLAlchemy ORM.
 """
 
 from datetime import datetime
 from typing import List
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.orm import relationship
+
+from todolist_app.db import Base
 
 
-class Project:
+class Project(Base):
     """
-    Represents a project in the ToDoList system.
+    Represents a project in the ToDoList system (ORM Entity).
 
     A project is a container for multiple tasks and has its own metadata
     including name, description, and timestamps.
+    This class uses SQLAlchemy ORM for database persistence.
 
     Attributes:
-        id (int): Unique identifier for the project
-        name (str): Name of the project
+        id (int): Unique identifier for the project (auto-generated)
+        name (str): Name of the project (unique)
         description (str): Detailed description of the project
         created_at (datetime): Timestamp when the project was created
-        updated_at (datetime): Timestamp when the project was last updated
         tasks (List[Task]): List of tasks belonging to this project
     """
-
-    def __init__(self, id: int, name: str, description: str):
+    
+    __tablename__ = "projects"
+    
+    # Primary key
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    
+    # Project details
+    name = Column(String(500), nullable=False, unique=True)
+    description = Column(String(2000), nullable=True)
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Relationship with Tasks (one-to-many)
+    # cascade="all, delete-orphan" means when project is deleted, all tasks are deleted too
+    tasks = relationship(
+        "Task", 
+        back_populates="project", 
+        cascade="all, delete-orphan",
+        lazy="selectin"  # Automatically load tasks when querying project
+    )
+    
+    def __repr__(self) -> str:
         """
-        Initialize a new Project instance.
+        Return developer-friendly representation of the project.
 
-        Args:
-            id (int): Unique identifier for the project
-            name (str): Name of the project
-            description (str): Detailed description of the project
+        Returns:
+            str: String representation for debugging
         """
-        self.id = id
-        self.name = name
-        self.description = description
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
-        self.tasks: List = []
-
-    def update(self, name: str = None, description: str = None) -> None:
-        """
-        Update project details.
-
-        Args:
-            name (str, optional): New name for the project
-            description (str, optional): New description for the project
-        """
-        if name is not None:
-            self.name = name
-        if description is not None:
-            self.description = description
-        self.updated_at = datetime.now()
-
+        return f"Project(id={self.id}, name='{self.name}', tasks={len(self.tasks)})"
+    
     def __str__(self) -> str:
         """
         Return string representation of the project.
@@ -67,15 +70,20 @@ class Project:
             f"Name: {self.name}\n"
             f"Description: {self.description}\n"
             f"Created: {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}\n"
-            f"Updated: {self.updated_at.strftime('%Y-%m-%d %H:%M:%S')}\n"
             f"Number of Tasks: {len(self.tasks)}"
         )
-
-    def __repr__(self) -> str:
+    
+    def to_dict(self) -> dict:
         """
-        Return developer-friendly representation of the project.
-
+        Convert project to dictionary representation.
+        
         Returns:
-            str: String representation for debugging
+            dict: Dictionary containing all project attributes and tasks
         """
-        return f"Project(id={self.id}, name='{self.name}', tasks={len(self.tasks)})"
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'created_at': self.created_at.isoformat(),
+            'tasks': [task.to_dict() for task in self.tasks]
+        }
