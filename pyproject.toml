@@ -25,6 +25,8 @@ packages = [{include = "todolist_app"}]
 [tool.poetry.dependencies]
 python = "^3.12"
 python-dotenv = "^1.0.0"
+sqlalchemy = "^2.0.44"
+psycopg2 = "^2.9.11"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"

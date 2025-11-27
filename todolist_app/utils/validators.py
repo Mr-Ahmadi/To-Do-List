@@ -8,7 +8,7 @@ including project names, task titles, descriptions, dates, and statuses.
 from datetime import datetime
 from typing import Optional
 
-from todolist_app.exceptions.custom_exceptions import (
+from todolist_app.exceptions.service_exceptions import (
     InvalidDateException,
     InvalidStatusException,
     ValidationException,

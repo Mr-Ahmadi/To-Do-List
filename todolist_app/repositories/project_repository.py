@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
 from todolist_app.models.project import Project
-from todolist_app.exceptions.custom_exceptions import (
+from todolist_app.exceptions.repository_exceptions import (
     ProjectNotFoundException,
     DuplicateProjectException,
     DatabaseOperationException,
