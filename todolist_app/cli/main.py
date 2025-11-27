@@ -124,9 +124,9 @@ class TodoListCLI:
         print("=" * 60)
 
         name = input(f"\nProject Name ({Config.PROJECT_NAME_MIN_WORDS}-{Config.PROJECT_NAME_MAX_WORDS} words): ").strip()
-        description = input(f"Description ({Config.PROJECT_DESCRIPTION_MIN_WORDS}-{Config.PROJECT_DESCRIPTION_MAX_WORDS} words): ").strip()
+        description = input(f"Description (optional, max {Config.PROJECT_DESCRIPTION_MAX_WORDS} words): ").strip()
 
-        project = self.project_manager.create_project(name, description)
+        project = self.project_manager.create_project(name, description if description else None)
         print(f"\n✅ Project created successfully!")
         print(f"   ID: {project.id}")
         print(f"   Name: {project.name}")
@@ -213,7 +213,7 @@ class TodoListCLI:
             print(f"Current Description: {project.description}")
 
             name = input("\nNew Name (or press Enter to keep current): ").strip()
-            description = input("New Description (or press Enter to keep current): ").strip()
+            description = input(f"New Description (optional, max {Config.PROJECT_DESCRIPTION_MAX_WORDS} words, or press Enter to keep current): ").strip()
 
             # Update project
             self.project_manager.update_project(
