@@ -1,12 +1,15 @@
-
----
-
 # 📋 ToDoList Application
 
-A **CLI-based task management system** built with **Python OOP principles**, featuring project and task handling with in-memory storage.
+A **CLI-based task management system** built with  
+**Python OOP**, **SQLAlchemy ORM**, **PostgreSQL**, **Docker**, and **Alembic migrations**.
 
-[![Python Version](https://img.shields.io/badge/python-3.8.1%2B-blue.svg)](https://www.python.org/downloads/)
+Now fully persistent — your tasks and projects are stored in a **relational database** instead of in‑memory.
+
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![Poetry](https://img.shields.io/badge/dependency%20management-poetry-blue)](https://python-poetry.org/)
+[![Database](https://img.shields.io/badge/database-PostgreSQL-316192.svg)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/containerized-Docker-blue.svg)](https://www.docker.com/)
+[![Migrations](https://img.shields.io/badge/migrations-Alembic-yellow.svg)](https://alembic.sqlalchemy.org/)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -16,47 +19,66 @@ A **CLI-based task management system** built with **Python OOP principles**, fea
 
 ### Project Management
 - Create, read, update, delete projects  
-- Configurable limit (default: **10 projects**)  
-- Word count validation for names/descriptions  
-- Duplicate name prevention  
-- View all active projects with details  
+- Configurable maximum number of projects  
+- Word‑count validation for names/descriptions  
+- Prevent duplicate names  
+- View project summaries and progress  
 
 ### Task Management
-- CRUD operations within projects  
-- Up to **50 tasks per project** (configurable)  
-- Statuses: `todo`, `in_progress`, `done`  
-- Optional validated deadlines (future `YYYY-MM-DD`)  
+- Full CRUD operations  
+- Status workflow: `todo`, `in_progress`, `done`  
+- Optional deadlines (`YYYY-MM-DD`, validated, must be in the future)  
 - Search tasks by title/description  
 - View overdue tasks  
-- Project completion tracking  
+- Project completion calculations  
 
 ### Data Validation
-- Word count and format checks  
-- Status whitelist validation  
-- Date format and future date verification  
-- Comprehensive custom exceptions  
+- Word-count constraints  
+- Enum status validation  
+- Date format checking  
+- Custom exception hierarchy (base, repository, service)  
+
+### Persistence Layer
+- PostgreSQL relational database  
+- SQLAlchemy ORM models (`Project`, `Task`)  
+- Repository pattern (clean separation of DB from business logic)
+
+### Migrations
+- Alembic auto‑generation  
+- Versioned schema upgrades  
+- Easily reproducible database setup
+
+### Infrastructure
+- Database runs in Docker  
+- Local development uses environment variables  
+- Fully portable and OS‑independent  
 
 ---
 
-## 📁 Project Structure
+## 📁 Updated Project Structure
 
 ```bash
 To-Do-List/
 ├── todolist_app/
 │   ├── cli/
-│   │   └── main.py
-│   ├── models/            # Project, Task
-│   ├── managers/          # ProjectManager, TaskManager
-│   ├── utils/             # Config + Validators
-│   └── exceptions/
-├── tests/
-│   ├── test_project.py
-│   ├── test_task.py
-│   ├── test_validators.py
-│   ├── test_project_manager.py
-│   └── test_task_manager.py
-├── docs/
-├── main.py
+│   │   └── main.py               # Entry point for CLI
+│   ├── db/
+│   │   ├── base.py               # SQLAlchemy Base
+│   │   ├── session.py            # DB session + context manager
+│   │   └── __init__.py
+│   ├── models/                   # ORM models: Project, Task
+│   ├── repository/               # Repository layer
+│   ├── services/                 # Business logic
+│   ├── utils/
+│   │   ├── config.py             # Reads .env + DB URL builder
+│   │   └── validators.py
+│   ├── exceptions/               # Custom exceptions
+│   └── alembic/                  # Alembic migrations
+│       ├── env.py
+│       ├── script.py.mako
+│       └── versions/
+├── docker-compose.yml            # PostgreSQL in Docker
+├── main.py                       # Shortcut runner
 ├── pyproject.toml
 ├── .env
 ├── .gitignore
@@ -67,60 +89,91 @@ To-Do-List/
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- **Python ≥ 3.8.1**
-- **Poetry** installed
+### 1. Prerequisites
 
-### Install Poetry
-```bash
-# macOS/Linux
-curl -sSL https://install.python-poetry.org | python3 -
-
-# Windows (PowerShell)
-(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
-```
-
-Verify installation:
-```bash
-poetry --version
-```
+- **Python 3.10+**
+- **Poetry**
+- **Docker Desktop** installed + running
 
 ---
 
-### Installation
+### 2. Install Dependencies
+
 ```bash
 git clone https://github.com/yourusername/To-Do-List.git
 cd To-Do-List
 poetry install
 ```
 
-Create a `.env` file in project root:
+---
+
+### 3. Setup Environment Variables
+
+Create a file `.env` in the project root:
+
 ```bash
+# App
 MAX_NUMBER_OF_PROJECT=10
 MAX_NUMBER_OF_TASK=50
-PROJECT_NAME_MIN_WORDS=1
-PROJECT_NAME_MAX_WORDS=4
-PROJECT_DESCRIPTION_MIN_WORDS=3
-PROJECT_DESCRIPTION_MAX_WORDS=20
-TASK_TITLE_MIN_WORDS=1
-TASK_TITLE_MAX_WORDS=5
-TASK_DESCRIPTION_MIN_WORDS=3
-TASK_DESCRIPTION_MAX_WORDS=30
+
+# Database
+DB_USER=todouser
+DB_PASSWORD=todopass
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=todolist_db
 ```
 
 ---
 
-## 🎯 Usage
+### 4. Start PostgreSQL in Docker
 
-### Run the Application
+```bash
+docker-compose up -d
+```
+
+Check DB is running:
+
+```bash
+docker ps
+```
+
+---
+
+### 5. Run Database Migrations
+
+```bash
+alembic upgrade head
+```
+
+If you change models:
+
+```bash
+alembic revision --autogenerate -m "description"
+alembic upgrade head
+```
+
+---
+
+## 🎯 Run the Application
+
+### Option 1 — Direct
+
 ```bash
 poetry run todolist
-# or
+```
+
+### Option 2 — Inside Poetry Shell
+
+```bash
 poetry shell
 todolist
 ```
 
-### Main Menu
+---
+
+## 📟 CLI Menu
+
 ```
 📋 ToDo List Manager
 1.  Create Project
@@ -138,3 +191,18 @@ todolist
 ```
 
 ---
+
+## 🧪 Testing
+
+Run all tests:
+
+```bash
+poetry run pytest -v
+```
+
+---
+
+## 📄 License
+
+MIT License.  
+Feel free to fork, improve, and contribute!
