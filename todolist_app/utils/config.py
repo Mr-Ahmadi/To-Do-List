@@ -22,30 +22,86 @@ class Config:
     and provides default values when environment variables are not set.
     """
 
-    # Maximum limits
-    MAX_NUMBER_OF_PROJECT: int = int(os.getenv("MAX_NUMBER_OF_PROJECT", "10"))
-    MAX_NUMBER_OF_TASK: int = int(os.getenv("MAX_NUMBER_OF_TASK", "50"))
+    # ========== Database Configuration ==========
+    DB_USER: str = os.getenv("DB_USER", "todouser")
+    DB_PASSWORD: str = os.getenv("DB_PASSWORD", "todopass")
+    DB_NAME: str = os.getenv("DB_NAME", "todolist_db")
+    DB_HOST: str = os.getenv("DB_HOST", "localhost")
+    DB_PORT: str = os.getenv("DB_PORT", "5432")
 
-    # Word count limits for validation (based on PDF requirements)
-    # Project validation
-    PROJECT_NAME_MIN_WORDS: int = 1      # ✅ Minimum 1 word
-    PROJECT_NAME_MAX_WORDS: int = 30     # ✅ Maximum 30 words
-    PROJECT_DESCRIPTION_MIN_WORDS: int = 0  # ✅ Optional (0 = optional)
-    PROJECT_DESCRIPTION_MAX_WORDS: int = 150  # ✅ Maximum 150 words
-
-    # Task validation
-    TASK_TITLE_MIN_WORDS: int = 1        # ✅ Minimum 1 word
-    TASK_TITLE_MAX_WORDS: int = 30       # ✅ Maximum 30 words
-    TASK_DESCRIPTION_MIN_WORDS: int = 1  # ✅ Required (min 1 word)
-    TASK_DESCRIPTION_MAX_WORDS: int = 150  # ✅ Maximum 150 words
-
-    # Valid task statuses (from PDF: todo | doing | done)
-    VALID_STATUSES: List[str] = ["todo", "doing", "done"]  # ✅ Correct statuses
-
-    # Application settings
+    # ========== Application Settings ==========
+    APP_NAME: str = os.getenv("APP_NAME", "ToDoList")
     APP_ENV: str = os.getenv("APP_ENV", "development")
     DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
 
+    # ========== Maximum Limits ==========
+    MAX_NUMBER_OF_PROJECT: int = int(os.getenv("MAX_NUMBER_OF_PROJECT", "10"))
+    MAX_NUMBER_OF_TASK: int = int(os.getenv("MAX_NUMBER_OF_TASK", "50"))
+
+    # ========== Word Count Limits for Validation ==========
+    # Project validation
+    PROJECT_NAME_MIN_WORDS: int = 1
+    PROJECT_NAME_MAX_WORDS: int = 30
+    PROJECT_DESCRIPTION_MIN_WORDS: int = 0  # Optional
+    PROJECT_DESCRIPTION_MAX_WORDS: int = 150
+
+    # Task validation
+    TASK_TITLE_MIN_WORDS: int = 1
+    TASK_TITLE_MAX_WORDS: int = 30
+    TASK_DESCRIPTION_MIN_WORDS: int = 1
+    TASK_DESCRIPTION_MAX_WORDS: int = 150
+
+    # Valid task statuses (from PDF: todo | doing | done)
+    VALID_STATUSES: List[str] = ["todo", "doing", "done"]
+
+    # ========== Database Methods ==========
+    @classmethod
+    def get_database_url(cls, sync: bool = True) -> str:
+        """
+        Get PostgreSQL database connection URL.
+
+        Args:
+            sync (bool): If True, returns synchronous URL (postgresql://)
+                        If False, returns async URL (postgresql+asyncpg://)
+
+        Returns:
+            str: Database connection URL
+
+        Examples:
+            >>> Config.get_database_url()
+            'postgresql://todouser:todopass@localhost:5432/todolist_db'
+            >>> Config.get_database_url(sync=False)
+            'postgresql+asyncpg://todouser:todopass@localhost:5432/todolist_db'
+        """
+        # Check if DATABASE_URL is explicitly set
+        database_url = os.getenv("DATABASE_URL")
+        if database_url:
+            return database_url
+
+        # Construct from individual components
+        driver = "postgresql" if sync else "postgresql+asyncpg"
+        return (
+            f"{driver}://{cls.DB_USER}:{cls.DB_PASSWORD}"
+            f"@{cls.DB_HOST}:{cls.DB_PORT}/{cls.DB_NAME}"
+        )
+
+    @classmethod
+    def get_database_config(cls) -> dict:
+        """
+        Get database configuration as dictionary.
+
+        Returns:
+            dict: Dictionary containing all database configuration parameters
+        """
+        return {
+            "user": cls.DB_USER,
+            "password": cls.DB_PASSWORD,
+            "database": cls.DB_NAME,
+            "host": cls.DB_HOST,
+            "port": cls.DB_PORT,
+        }
+
+    # ========== Application Methods ==========
     @classmethod
     def get_max_projects(cls) -> int:
         """
@@ -97,6 +153,17 @@ class Config:
         return cls.APP_ENV
 
     @classmethod
+    def get_app_name(cls) -> str:
+        """
+        Get application name.
+
+        Returns:
+            str: Application name
+        """
+        return cls.APP_NAME
+
+    # ========== Validation Limit Methods ==========
+    @classmethod
     def get_project_name_limits(cls) -> tuple[int, int]:
         """
         Get project name word limits.
@@ -114,7 +181,10 @@ class Config:
         Returns:
             tuple[int, int]: (min_words, max_words)
         """
-        return (cls.PROJECT_DESCRIPTION_MIN_WORDS, cls.PROJECT_DESCRIPTION_MAX_WORDS)
+        return (
+            cls.PROJECT_DESCRIPTION_MIN_WORDS,
+            cls.PROJECT_DESCRIPTION_MAX_WORDS,
+        )
 
     @classmethod
     def get_task_title_limits(cls) -> tuple[int, int]:
@@ -134,4 +204,28 @@ class Config:
         Returns:
             tuple[int, int]: (min_words, max_words)
         """
-        return (cls.TASK_DESCRIPTION_MIN_WORDS, cls.TASK_DESCRIPTION_MAX_WORDS)
+        return (
+            cls.TASK_DESCRIPTION_MIN_WORDS,
+            cls.TASK_DESCRIPTION_MAX_WORDS,
+        )
+
+    @classmethod
+    def display_config(cls) -> None:
+        """
+        Display current configuration (for debugging).
+        Passwords are masked for security.
+        """
+        print("=" * 50)
+        print(f"🚀 {cls.APP_NAME} Configuration")
+        print("=" * 50)
+        print(f"Environment: {cls.APP_ENV}")
+        print(f"Debug Mode: {cls.DEBUG}")
+        print(f"\n📊 Database:")
+        print(f"  Host: {cls.DB_HOST}:{cls.DB_PORT}")
+        print(f"  Database: {cls.DB_NAME}")
+        print(f"  User: {cls.DB_USER}")
+        print(f"  Password: {'*' * len(cls.DB_PASSWORD)}")
+        print(f"\n⚙️  Limits:")
+        print(f"  Max Projects: {cls.MAX_NUMBER_OF_PROJECT}")
+        print(f"  Max Tasks: {cls.MAX_NUMBER_OF_TASK}")
+        print("=" * 50)

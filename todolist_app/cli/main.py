@@ -10,10 +10,9 @@ from typing import Optional
 from todolist_app.exceptions.service_exceptions import TodoListException
 from todolist_app.services.project_service import ProjectService
 from todolist_app.services.task_service import TaskService
-from todolist_app.models.project import Project
 from todolist_app.models.task import TaskStatus
 from todolist_app.utils.config import Config
-from todolist_app.db.session import get_db
+from todolist_app.db.session import get_db_context
 
 
 class TodoListCLI:
@@ -98,7 +97,7 @@ class TodoListCLI:
         # Display current project info
         if self.current_project_id:
             try:
-                for db in get_db():
+                with get_db_context() as db:
                     service = ProjectService(db)
                     project = service.get_project_by_id(self.current_project_id)
                     task_count = TaskService(db).get_task_count(project.id)
@@ -147,7 +146,7 @@ class TodoListCLI:
             f"Description (optional, max {Config.PROJECT_DESCRIPTION_MAX_WORDS} words): "
         ).strip()
 
-        for db in get_db():
+        with get_db_context() as db:
             service = ProjectService(db)
             project = service.create_project(
                 name, description if description else None
@@ -162,7 +161,7 @@ class TodoListCLI:
         print("ALL PROJECTS".center(60))
         print("=" * 60)
 
-        for db in get_db():
+        with get_db_context() as db:
             service = ProjectService(db)
             projects = service.get_all_projects()
 
@@ -184,7 +183,7 @@ class TodoListCLI:
         print("SELECT PROJECT".center(60))
         print("=" * 60)
 
-        for db in get_db():
+        with get_db_context() as db:
             service = ProjectService(db)
             projects = service.get_all_projects()
 
@@ -220,7 +219,7 @@ class TodoListCLI:
         print("EDIT PROJECT".center(60))
         print("=" * 60)
 
-        for db in get_db():
+        with get_db_context() as db:
             service = ProjectService(db)
             projects = service.get_all_projects()
 
@@ -270,7 +269,7 @@ class TodoListCLI:
         print("DELETE PROJECT".center(60))
         print("=" * 60)
 
-        for db in get_db():
+        with get_db_context() as db:
             proj_service = ProjectService(db)
             task_service = TaskService(db)
             projects = proj_service.get_all_projects()
@@ -325,7 +324,7 @@ class TodoListCLI:
         print("CREATE NEW TASK".center(60))
         print("=" * 60)
 
-        for db in get_db():
+        with get_db_context() as db:
             proj_service = ProjectService(db)
             project = proj_service.get_project_by_id(self.current_project_id)
             print(f"Project: {project.name}\n")
@@ -367,7 +366,7 @@ class TodoListCLI:
         print("ALL TASKS".center(60))
         print("=" * 60)
 
-        for db in get_db():
+        with get_db_context() as db:
             proj_service = ProjectService(db)
             task_service = TaskService(db)
 
@@ -402,7 +401,7 @@ class TodoListCLI:
         print("VIEW TASKS BY STATUS".center(60))
         print("=" * 60)
 
-        for db in get_db():
+        with get_db_context() as db:
             proj_service = ProjectService(db)
             task_service = TaskService(db)
 
@@ -439,7 +438,7 @@ class TodoListCLI:
         print("EDIT TASK".center(60))
         print("=" * 60)
 
-        for db in get_db():
+        with get_db_context() as db:
             proj_service = ProjectService(db)
             task_service = TaskService(db)
 
@@ -509,7 +508,7 @@ class TodoListCLI:
         print("DELETE TASK".center(60))
         print("=" * 60)
 
-        for db in get_db():
+        with get_db_context() as db:
             proj_service = ProjectService(db)
             task_service = TaskService(db)
 
@@ -560,7 +559,7 @@ class TodoListCLI:
         print("MARK TASK AS DONE".center(60))
         print("=" * 60)
 
-        for db in get_db():
+        with get_db_context() as db:
             proj_service = ProjectService(db)
             task_service = TaskService(db)
 
@@ -607,7 +606,7 @@ class TodoListCLI:
             print("\n❌ Search term cannot be empty.")
             return
 
-        for db in get_db():
+        with get_db_context() as db:
             service = ProjectService(db)
             projects = service.search_projects(query)
 
@@ -633,7 +632,7 @@ class TodoListCLI:
         print("SEARCH TASKS".center(60))
         print("=" * 60)
 
-        for db in get_db():
+        with get_db_context() as db:
             proj_service = ProjectService(db)
             task_service = TaskService(db)
 
