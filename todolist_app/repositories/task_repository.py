@@ -8,7 +8,6 @@ from typing import List, Optional
 from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-
 from todolist_app.models.task import Task, TaskStatus
 from todolist_app.exceptions.repository_exceptions import (
     TaskNotFoundException,
@@ -306,3 +305,40 @@ class TaskRepository:
         return self.db.query(Task).filter(
             Task.project_id == project_id
         ).count()
+
+    def get_overdue_tasks(self):
+        """
+        Returns all tasks where:
+        deadline < now AND status != DONE
+        """
+        now = datetime.utcnow()
+        return (
+            self.db.query(Task)
+            .filter(
+                Task.deadline < now,
+                Task.status != TaskStatus.DONE
+            )
+            .all()
+        )
+
+    def autoclose_overdue_tasks(self) -> int:
+        """
+        Marks all overdue tasks as DONE and fills closed_at.
+        Returns number of updated tasks.
+        """
+        now = datetime.utcnow()
+        tasks = (
+            self.db.query(Task)
+            .filter(
+                Task.deadline < now,
+                Task.status != TaskStatus.DONE
+            )
+            .all()
+        )
+
+        for task in tasks:
+            task.status = TaskStatus.DONE
+            task.closed_at = now
+
+        self.db.commit()
+        return len(tasks)

@@ -277,3 +277,6 @@ class TaskService:
             int: Number of tasks
         """
         return self.repository.count_by_project(project_id)
+
+    def autoclose_overdue_tasks(self):
+        return self.repository.autoclose_overdue_tasks()
