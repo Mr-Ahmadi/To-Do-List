@@ -1,0 +1,438 @@
+### Variables
+@baseUrl = http://localhost:8004
+@contentType = application/json
+
+### ============================================
+### PROJECT ENDPOINTS
+### ============================================
+
+### 1. Get all projects
+GET {{baseUrl}}/api/projects/
+Accept: {{contentType}}
+
+### 2. Create a new project
+POST {{baseUrl}}/api/projects/
+Content-Type: {{contentType}}
+
+{
+  "name": "API Test Project",
+  "description": "This project was created via REST Client"
+}
+
+### 3. Get a specific project by ID
+GET {{baseUrl}}/api/projects/3
+Accept: {{contentType}}
+
+### 4. Update a project (full update)
+PUT {{baseUrl}}/api/projects/1
+Content-Type: {{contentType}}
+
+{
+  "name": "Updated Project Name",
+  "description": "This project was updated via REST Client"
+}
+
+### 5. Delete a project
+DELETE {{baseUrl}}/api/projects/2
+
+### ============================================
+### TASK ENDPOINTS
+### ============================================
+
+### 6. Get all tasks for a specific project (project_id required)
+GET {{baseUrl}}/api/tasks/?project_id=1
+Accept: {{contentType}}
+
+### 7. Get tasks filtered by project and status
+GET {{baseUrl}}/api/tasks/?project_id=1&status=todo
+Accept: {{contentType}}
+
+### 8. Get tasks with status filter (requires project_id)
+GET {{baseUrl}}/api/tasks/?project_id=1&status=in_progress
+Accept: {{contentType}}
+
+### 9. Get all overdue tasks (no project filter)
+GET {{baseUrl}}/api/tasks/overdue
+Accept: {{contentType}}
+
+### 10. Get overdue tasks for specific project
+GET {{baseUrl}}/api/tasks/overdue?project_id=1
+Accept: {{contentType}}
+
+### 11. Search tasks in a project
+GET {{baseUrl}}/api/tasks/search?project_id=1&query=test
+Accept: {{contentType}}
+
+### 12. Create a task (basic - project_id required)
+POST {{baseUrl}}/api/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "Basic Task",
+  "description": "This is a basic task",
+  "project_id": 1
+}
+
+### 13. Create a task with due date
+POST {{baseUrl}}/api/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "Task with Deadline",
+  "description": "This task has a deadline",
+  "project_id": 1,
+  "due_date": "2025-12-15"
+}
+
+### 14. Create a task with all optional fields
+POST {{baseUrl}}/api/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "Complete Task Example",
+  "description": "Task with all possible fields filled",
+  "project_id": 1,
+  "due_date": "2025-12-20",
+  "status": "in_progress",
+  "priority": 4
+}
+
+### 15. Get a specific task by ID
+GET {{baseUrl}}/api/tasks/1
+Accept: {{contentType}}
+
+### 16. Update a task - partial update (only status)
+PUT {{baseUrl}}/api/tasks/1
+Content-Type: {{contentType}}
+
+{
+  "status": "done"
+}
+
+### 17. Update a task - change title and description
+PUT {{baseUrl}}/api/tasks/1
+Content-Type: {{contentType}}
+
+{
+  "title": "Updated Task Title",
+  "description": "Updated description with more details"
+}
+
+### 18. Update a task - full update with all fields
+PUT {{baseUrl}}/api/tasks/1
+Content-Type: {{contentType}}
+
+{
+  "title": "Fully Updated Task",
+  "description": "All fields have been updated",
+  "due_date": "2025-12-25",
+  "status": "in_progress",
+  "priority": 5
+}
+
+### 19. Mark a task as done (quick action)
+PATCH {{baseUrl}}/api/tasks/1/mark-done
+Accept: {{contentType}}
+
+### 20. Delete a task
+DELETE {{baseUrl}}/api/tasks/2
+
+### ============================================
+### ERROR HANDLING TESTS
+### ============================================
+
+### 21. Try to get non-existent project
+GET {{baseUrl}}/api/projects/99999
+Accept: {{contentType}}
+
+### 22. Try to get non-existent task
+GET {{baseUrl}}/api/tasks/99999
+Accept: {{contentType}}
+
+### 23. Try to create task without required project_id
+POST {{baseUrl}}/api/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "Task without project",
+  "description": "This should fail - no project_id"
+}
+
+### 24. Try to create task with invalid project_id
+POST {{baseUrl}}/api/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "Task with invalid project",
+  "description": "This should fail - project doesn't exist",
+  "project_id": 99999
+}
+
+### 25. Try to create project with missing required name
+POST {{baseUrl}}/api/projects/
+Content-Type: {{contentType}}
+
+{
+  "description": "Missing name field - should fail"
+}
+
+### 26. Try to create task with invalid date format
+POST {{baseUrl}}/api/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "Invalid Date Task",
+  "description": "Bad date format",
+  "project_id": 1,
+  "due_date": "invalid-date"
+}
+
+### 27. Try to list tasks without project_id (should fail)
+GET {{baseUrl}}/api/tasks/
+Accept: {{contentType}}
+
+### 28. Try to filter by status without project_id (should fail)
+GET {{baseUrl}}/api/tasks/?status=todo
+Accept: {{contentType}}
+
+### ============================================
+### WORKFLOW TESTS - Complete Use Case
+### ============================================
+
+### STEP 1: Create a new project
+POST {{baseUrl}}/api/projects/
+Content-Type: {{contentType}}
+
+{
+  "name": "Website Redesign",
+  "description": "Complete redesign of company website"
+}
+
+###
+# Note: Use the project ID from the response above in the following requests
+# Replace {project_id} with actual ID (e.g., 1, 2, 3...)
+
+### STEP 2: Create first task - Design phase
+POST {{baseUrl}}/api/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "Create Wireframes",
+  "description": "Design wireframes for all main pages",
+  "project_id": 1,
+  "due_date": "2025-12-10",
+  "status": "todo",
+  "priority": 5
+}
+
+### STEP 3: Create second task - Development phase
+POST {{baseUrl}}/api/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "Develop Homepage",
+  "description": "Implement homepage based on approved designs",
+  "project_id": 1,
+  "due_date": "2025-12-15",
+  "status": "todo",
+  "priority": 4
+}
+
+### STEP 4: Create third task - Testing phase
+POST {{baseUrl}}/api/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "User Testing",
+  "description": "Conduct user testing sessions",
+  "project_id": 1,
+  "due_date": "2025-12-20",
+  "status": "todo",
+  "priority": 3
+}
+
+### STEP 5: View all tasks for the project
+GET {{baseUrl}}/api/tasks/?project_id=1
+Accept: {{contentType}}
+
+### STEP 6: Start working on first task
+PUT {{baseUrl}}/api/tasks/1
+Content-Type: {{contentType}}
+
+{
+  "status": "in_progress"
+}
+
+### STEP 7: Complete the first task
+PATCH {{baseUrl}}/api/tasks/1/mark-done
+Accept: {{contentType}}
+
+### STEP 8: View only completed tasks
+GET {{baseUrl}}/api/tasks/?project_id=1&status=done
+Accept: {{contentType}}
+
+### STEP 9: View only in-progress tasks
+GET {{baseUrl}}/api/tasks/?project_id=1&status=in_progress
+Accept: {{contentType}}
+
+### STEP 10: View only todo tasks
+GET {{baseUrl}}/api/tasks/?project_id=1&status=todo
+Accept: {{contentType}}
+
+### STEP 11: Search for tasks with "design" keyword
+GET {{baseUrl}}/api/tasks/search?project_id=1&query=design
+Accept: {{contentType}}
+
+### STEP 12: Check for overdue tasks
+GET {{baseUrl}}/api/tasks/overdue?project_id=1
+Accept: {{contentType}}
+
+### STEP 13: Update project with more details
+PUT {{baseUrl}}/api/projects/1
+Content-Type: {{contentType}}
+
+{
+  "name": "Website Redesign 2025",
+  "description": "Complete redesign of company website - Q4 2025 launch"
+}
+
+### STEP 14: Get updated project details
+GET {{baseUrl}}/api/projects/1
+Accept: {{contentType}}
+
+### STEP 15: Update task priority
+PUT {{baseUrl}}/api/tasks/2
+Content-Type: {{contentType}}
+
+{
+  "priority": 5,
+  "status": "in_progress"
+}
+
+### STEP 16: Extend task deadline
+PUT {{baseUrl}}/api/tasks/3
+Content-Type: {{contentType}}
+
+{
+  "due_date": "2025-12-25"
+}
+
+### ============================================
+### VALIDATION TESTS
+### ============================================
+
+### 29. Create task with empty title (should fail)
+POST {{baseUrl}}/api/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "",
+  "description": "Task with empty title",
+  "project_id": 1
+}
+
+### 30. Create project with empty name (should fail)
+POST {{baseUrl}}/api/projects/
+Content-Type: {{contentType}}
+
+{
+  "name": "",
+  "description": "Project with empty name"
+}
+
+### 31. Update task with invalid status value
+PUT {{baseUrl}}/api/tasks/1
+Content-Type: {{contentType}}
+
+{
+  "status": "invalid_status_value"
+}
+
+### 32. Create task with past due date (should still work)
+POST {{baseUrl}}/api/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "Overdue Task Test",
+  "description": "This task has a past deadline",
+  "project_id": 1,
+  "due_date": "2020-01-01"
+}
+
+### ============================================
+### BULK OPERATIONS
+### ============================================
+
+### 33. Create multiple tasks in sequence
+# Task 1
+POST {{baseUrl}}/api/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "Research Phase",
+  "description": "Market research and competitor analysis",
+  "project_id": 1,
+  "priority": 5
+}
+
+### Task 2
+POST {{baseUrl}}/api/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "Planning Phase",
+  "description": "Create detailed project plan",
+  "project_id": 1,
+  "priority": 4
+}
+
+### Task 3
+POST {{baseUrl}}/api/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "Execution Phase",
+  "description": "Implement the planned features",
+  "project_id": 1,
+  "priority": 3
+}
+
+### 34. View all tasks to verify bulk creation
+GET {{baseUrl}}/api/tasks/?project_id=1
+Accept: {{contentType}}
+
+### ============================================
+### INTERACTIVE API DOCUMENTATION
+### ============================================
+
+### Open in browser for interactive testing:
+# Swagger UI: http://localhost:8001/docs
+# ReDoc: http://localhost:8001/redoc
+
+### ============================================
+### CLEANUP OPERATIONS (Optional)
+### ============================================
+
+### 35. Delete all created tasks (run individually with correct IDs)
+# DELETE {{baseUrl}}/api/tasks/1
+# DELETE {{baseUrl}}/api/tasks/2
+# DELETE {{baseUrl}}/api/tasks/3
+
+### 36. Delete test project
+# DELETE {{baseUrl}}/api/projects/1
+
+### ============================================
+### NOTES
+### ============================================
+# 
+# Key differences from previous version:
+# 1. Changed port from 8003 to 8001 (your actual running port)
+# 2. Tasks now REQUIRE project_id in all list operations
+# 3. Added new endpoints: /overdue, /search, /{id}/mark-done
+# 4. Service uses 'deadline' internally but API uses 'due_date'
+# 5. Status values: "todo", "in_progress", "done", "overdue"
+# 6. Removed standalone task creation (project_id is required)
+# 7. Added validation tests for required fields
+# 8. Added workflow demonstrating typical usage patterns
+#
+### ============================================

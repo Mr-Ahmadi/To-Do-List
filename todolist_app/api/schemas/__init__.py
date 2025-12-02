@@ -1,30 +1,33 @@
-"""
-Pydantic schemas for request/response validation.
-"""
-
 from .project_schemas import (
+    ProjectBase,
     ProjectCreate,
     ProjectUpdate,
     ProjectRead,
-    ProjectList
+    ProjectInList,
+    # Remove ProjectList from here - it's not in the schema file anymore
 )
 
 from .task_schemas import (
+    TaskBase,
     TaskCreate,
     TaskUpdate,
     TaskRead,
-    TaskList,
-    TaskStatusUpdate
+    TaskInList,
 )
 
 __all__ = [
+    # Project schemas
+    "ProjectBase",
     "ProjectCreate",
     "ProjectUpdate",
     "ProjectRead",
-    "ProjectList",
+    "ProjectInList",
+    # Removed "ProjectList"
+    
+    # Task schemas
+    "TaskBase",
     "TaskCreate",
     "TaskUpdate",
     "TaskRead",
-    "TaskList",
-    "TaskStatusUpdate"
+    "TaskInList",
 ]
