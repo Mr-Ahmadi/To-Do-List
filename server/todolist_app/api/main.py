@@ -117,7 +117,11 @@ def custom_openapi():
     
     openapi_schema["servers"] = [
         {"url": "http://localhost:8000", "description": "Development"},
-        {"url": "https://api.todolist.example.com", "description": "Production"}
+        {"url": "http://localhost:8001", "description": "Development"},
+        {"url": "http://localhost:8002", "description": "Development"},
+        {"url": "http://localhost:8003", "description": "Development"},
+        {"url": "http://localhost:8004", "description": "Development"},
+        {"url": "https://api.todolist.com", "description": "Production"}
     ]
     
     app.openapi_schema = openapi_schema
