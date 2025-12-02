@@ -1,57 +1,38 @@
-"""
-Pydantic models for Project API validation.
-"""
-
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
-from pydantic import BaseModel, Field, ConfigDict
 
 
 class ProjectBase(BaseModel):
-    """Base schema for project with common fields."""
-    name: str = Field(
-        ...,
-        min_length=1,
-        max_length=100,
-        description="Project name (1-100 characters)"
-    )
-    description: Optional[str] = Field(
-        None,
-        max_length=500,
-        description="Project description (max 500 characters)"
-    )
+    """Base schema for Project"""
+    name: str = Field(..., min_length=1, max_length=255, description="Project name")
+    description: Optional[str] = Field(None, description="Project description")
 
 
 class ProjectCreate(ProjectBase):
-    """Schema for creating a new project."""
+    """Schema for creating a new project"""
     pass
 
 
 class ProjectUpdate(BaseModel):
-    """Schema for updating an existing project."""
-    name: Optional[str] = Field(
-        None,
-        min_length=1,
-        max_length=100,
-        description="Updated project name"
-    )
-    description: Optional[str] = Field(
-        None,
-        max_length=500,
-        description="Updated project description"
-    )
+    """Schema for updating a project"""
+    name: Optional[str] = Field(None, min_length=1, max_length=255)
+    description: Optional[str] = None
 
 
 class ProjectRead(ProjectBase):
-    """Schema for reading project data (response)."""
-    id: int = Field(..., description="Project ID")
-    created_at: datetime = Field(..., description="Creation timestamp")
-    updated_at: datetime = Field(..., description="Last update timestamp")
+    """Schema for reading a project (response)"""
+    id: int
+    created_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
 
 
-class ProjectList(BaseModel):
-    """Schema for list of projects response."""
-    projects: list[ProjectRead]
-    total: int = Field(..., description="Total number of projects")
+class ProjectInList(BaseModel):
+    """Schema for project in list view"""
+    id: int
+    name: str
+    description: Optional[str]
+    created_at: datetime
+    
+    model_config = ConfigDict(from_attributes=True)

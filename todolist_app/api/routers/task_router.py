@@ -1,189 +1,218 @@
-"""
-Task API endpoints.
-Provides CRUD operations for tasks and status management.
-"""
-
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from todolist_app.api.dependencies import get_db
+from todolist_app.services.task_service import TaskService
+from todolist_app.services.project_service import ProjectService
+
 from todolist_app.api.schemas.task_schemas import (
     TaskCreate,
     TaskUpdate,
     TaskRead,
-    TaskList,
-    TaskStatusUpdate
-)
-from todolist_app.services.task_service import TaskService
-from todolist_app.models.task import TaskStatus
-from todolist_app.exceptions.repository_exceptions import (
-    TaskNotFoundException,
-    ProjectNotFoundException
-)
-from todolist_app.exceptions.service_exceptions import ValidationException
-
-
-router = APIRouter(
-    prefix="/tasks",
-    tags=["tasks"],
-    responses={404: {"description": "Task not found"}}
+    TaskInList,
 )
 
+router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
-@router.post(
-    "/",
-    response_model=TaskRead,
-    status_code=status.HTTP_201_CREATED,
-    summary="Create a new task",
-    description="Create a new task under a specific project"
-)
+
+@router.post("/", response_model=TaskRead, status_code=201)
 def create_task(
-    task: TaskCreate,
+    task_data: TaskCreate,
     db: Session = Depends(get_db)
 ):
     """
     Create a new task.
     
-    - **project_id**: ID of the parent project (required)
-    - **title**: Task title (required, 1-200 chars)
-    - **description**: Task description (optional, max 1000 chars)
-    - **deadline**: Task deadline in ISO 8601 format (optional)
+    - **title**: Task title (required)
+    - **description**: Task description (required)
+    - **project_id**: ID of parent project (required)
+    - **due_date**: Deadline in YYYY-MM-DD format (optional)
+    - **status**: Initial status (default: 'todo')
+    - **priority**: Task priority (optional)
     """
-    service = TaskService(db)
+    task_service = TaskService(db)
+    
+    # Validate project_id - it's required in the service
+    if not task_data.project_id:
+        raise HTTPException(status_code=400, detail="project_id is required")
+    
+    project_service = ProjectService(db)
+    project = project_service.get_project_by_id(task_data.project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
     
     try:
-        created_task = service.create_task(
-            project_id=task.project_id,
-            title=task.title,
-            description=task.description,
-            deadline=task.deadline
+        # Service expects: project_id, title, description, deadline (not due_date), status
+        task = task_service.create_task(
+            project_id=task_data.project_id,
+            title=task_data.title,
+            description=task_data.description,
+            deadline=task_data.due_date.isoformat() if task_data.due_date else None,
+            status=task_data.status if task_data.status else "todo"
         )
-        return created_task
-    except ProjectNotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
-    except ValidationException as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        return task
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get(
-    "/",
-    response_model=TaskList,
-    summary="List all tasks",
-    description="Retrieve all tasks with optional filtering by project or status"
-)
+@router.get("/", response_model=List[TaskInList])
 def list_tasks(
-    project_id: Optional[int] = Query(None, description="Filter by project ID"),
-    status_filter: Optional[TaskStatus] = Query(None, alias="status", description="Filter by task status"),
+    project_id: Optional[int] = Query(None, description="Filter tasks by project ID"),
+    status: Optional[str] = Query(None, description="Filter tasks by status (todo, in_progress, done, overdue)"),
     db: Session = Depends(get_db)
 ):
     """
-    Retrieve all tasks.
+    List all tasks with optional filters.
     
-    Optional query parameters:
-    - **project_id**: Filter tasks by project
-    - **status**: Filter tasks by status (TODO, IN_PROGRESS, DONE, OVERDUE)
+    - **project_id**: Filter by project (optional)
+    - **status**: Filter by status (optional)
     """
-    service = TaskService(db)
+    task_service = TaskService(db)
     
-    # Get all tasks first
-    tasks = service.list_tasks()
-    
-    # Apply filters
-    if project_id is not None:
-        tasks = [t for t in tasks if t.project_id == project_id]
-    
-    if status_filter is not None:
-        tasks = [t for t in tasks if t.status == status_filter]
-    
-    return TaskList(
-        tasks=tasks,
-        total=len(tasks)
-    )
+    try:
+        if project_id and status:
+            # Filter by both project and status
+            tasks = task_service.get_tasks_by_status(project_id, status)
+        elif project_id:
+            # Filter by project only
+            tasks = task_service.get_tasks_by_project(project_id)
+        elif status:
+            # Status filter without project not directly supported
+            # We'd need to get all tasks first - service doesn't have get_all_tasks()
+            raise HTTPException(
+                status_code=400, 
+                detail="Status filter requires project_id"
+            )
+        else:
+            # No filters - but service doesn't have get_all_tasks()
+            raise HTTPException(
+                status_code=400,
+                detail="Please provide project_id to list tasks"
+            )
+        
+        return tasks
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get(
-    "/{task_id}",
-    response_model=TaskRead,
-    summary="Get task by ID",
-    description="Retrieve a specific task by its ID"
-)
+@router.get("/overdue", response_model=List[TaskInList])
+def list_overdue_tasks(
+    project_id: Optional[int] = Query(None, description="Filter by project ID"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get all overdue tasks.
+    
+    - **project_id**: Filter by project (optional)
+    """
+    task_service = TaskService(db)
+    tasks = task_service.get_overdue_tasks(project_id)
+    return tasks
+
+
+@router.get("/search", response_model=List[TaskInList])
+def search_tasks(
+    project_id: int = Query(..., description="Project ID to search within"),
+    query: str = Query(..., description="Search term"),
+    db: Session = Depends(get_db)
+):
+    """
+    Search tasks by title or description.
+    
+    - **project_id**: Project to search in (required)
+    - **query**: Search term (required)
+    """
+    task_service = TaskService(db)
+    tasks = task_service.search_tasks(project_id, query)
+    return tasks
+
+
+@router.get("/{task_id}", response_model=TaskRead)
 def get_task(
     task_id: int,
     db: Session = Depends(get_db)
 ):
     """
-    Get a specific task.
+    Get a specific task by ID.
     
-    - **task_id**: ID of the task to retrieve
+    - **task_id**: ID of the task
     """
-    service = TaskService(db)
+    task_service = TaskService(db)
     
     try:
-        task = service.get_task(task_id)
+        task = task_service.get_task_by_id(task_id)
         return task
-    except TaskNotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Task not found")
 
 
-@router.put(
-    "/{task_id}",
-    response_model=TaskRead,
-    summary="Update a task",
-    description="Update task properties (title, description, deadline, status)"
-)
+@router.put("/{task_id}", response_model=TaskRead)
 def update_task(
     task_id: int,
-    task: TaskUpdate,
+    task_data: TaskUpdate,
     db: Session = Depends(get_db)
 ):
     """
-    Update an existing task.
+    Update a task.
     
-    - **task_id**: ID of the task to update
-    - **title**: New task title (optional)
-    - **description**: New task description (optional)
-    - **deadline**: New task deadline (optional)
-    - **status**: New task status (optional)
+    All fields are optional - only provided fields will be updated.
+    
+    - **title**: New task title
+    - **description**: New description
+    - **due_date**: New deadline in YYYY-MM-DD format
+    - **status**: New status (todo, in_progress, done, overdue)
     """
-    service = TaskService(db)
+    task_service = TaskService(db)
+    
+    # Check if task exists
+    try:
+        task = task_service.get_task_by_id(task_id)
+    except Exception:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    # Validate project_id if being updated
+    if task_data.project_id:
+        project_service = ProjectService(db)
+        try:
+            project = project_service.get_project_by_id(task_data.project_id)
+        except Exception:
+            raise HTTPException(status_code=404, detail="Project not found")
     
     try:
-        updated_task = service.update_task(
+        # Service expects: task_id, title, description, deadline (not due_date), status
+        updated_task = task_service.update_task(
             task_id=task_id,
-            title=task.title,
-            description=task.description,
-            deadline=task.deadline,
-            status=task.status.value if task.status else None
+            title=task_data.title,
+            description=task_data.description,
+            deadline=task_data.due_date.isoformat() if task_data.due_date else None,
+            status=task_data.status
         )
         return updated_task
-    except TaskNotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
-    except ValidationException as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.delete(
-    "/{task_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-    summary="Delete a task",
-    description="Delete a specific task"
-)
+@router.patch("/{task_id}/mark-done", response_model=TaskRead)
+def mark_task_done(
+    task_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Mark a task as done.
+    
+    - **task_id**: ID of the task
+    """
+    task_service = TaskService(db)
+    
+    try:
+        task = task_service.mark_task_as_done(task_id)
+        return task
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+
+@router.delete("/{task_id}", status_code=204)
 def delete_task(
     task_id: int,
     db: Session = Depends(get_db)
@@ -193,88 +222,12 @@ def delete_task(
     
     - **task_id**: ID of the task to delete
     """
-    service = TaskService(db)
+    task_service = TaskService(db)
     
     try:
-        service.delete_task(task_id)
-        return None
-    except TaskNotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
-
-
-@router.patch(
-    "/{task_id}/mark-done",
-    response_model=TaskRead,
-    summary="Mark task as done",
-    description="Mark a task as completed (DONE status)"
-)
-def mark_task_done(
-    task_id: int,
-    db: Session = Depends(get_db)
-):
-    """
-    Mark a task as done.
+        task_service.get_task_by_id(task_id)
+    except Exception:
+        raise HTTPException(status_code=404, detail="Task not found")
     
-    - **task_id**: ID of the task to mark as done
-    """
-    service = TaskService(db)
-    
-    try:
-        updated_task = service.mark_as_done(task_id)
-        return updated_task
-    except TaskNotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
-
-
-@router.patch(
-    "/{task_id}/mark-overdue",
-    response_model=TaskRead,
-    summary="Mark task as overdue",
-    description="Manually mark a task as overdue"
-)
-def mark_task_overdue(
-    task_id: int,
-    db: Session = Depends(get_db)
-):
-    """
-    Mark a task as overdue.
-    
-    - **task_id**: ID of the task to mark as overdue
-    """
-    service = TaskService(db)
-    
-    try:
-        updated_task = service.mark_as_overdue(task_id)
-        return updated_task
-    except TaskNotFoundException as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
-
-
-@router.post(
-    "/autoclose-overdue",
-    summary="Auto-close overdue tasks",
-    description="Automatically close all overdue tasks (sets status to DONE)"
-)
-def autoclose_overdue_tasks(db: Session = Depends(get_db)):
-    """
-    Auto-close overdue tasks.
-    
-    This endpoint triggers the auto-close mechanism for all tasks
-    that are past their deadline and not yet marked as done.
-    """
-    service = TaskService(db)
-    closed_count = service.autoclose_overdue_tasks()
-    
-    return {
-        "message": f"Successfully closed {closed_count} overdue task(s)",
-        "closed_count": closed_count
-    }
+    task_service.delete_task(task_id)
+    return None
