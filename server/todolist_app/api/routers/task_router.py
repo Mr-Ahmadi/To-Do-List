@@ -13,7 +13,7 @@ from todolist_app.api.schemas.task_schemas import (
     TaskInList,
 )
 
-router = APIRouter(prefix="/api/tasks", tags=["tasks"])
+router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
 @router.post("/", response_model=TaskRead, status_code=201)
@@ -27,9 +27,8 @@ def create_task(
     - **title**: Task title (required)
     - **description**: Task description (required)
     - **project_id**: ID of parent project (required)
-    - **due_date**: Deadline in YYYY-MM-DD format (optional)
+    - **deadline**: Deadline in YYYY-MM-DD format (optional)
     - **status**: Initial status (default: 'todo')
-    - **priority**: Task priority (optional)
     """
     task_service = TaskService(db)
     
@@ -43,12 +42,11 @@ def create_task(
         raise HTTPException(status_code=404, detail="Project not found")
     
     try:
-        # Service expects: project_id, title, description, deadline (not due_date), status
         task = task_service.create_task(
             project_id=task_data.project_id,
             title=task_data.title,
             description=task_data.description,
-            deadline=task_data.due_date.isoformat() if task_data.due_date else None,
+            deadline=task_data.deadline,
             status=task_data.status if task_data.status else "todo"
         )
         return task
@@ -59,7 +57,7 @@ def create_task(
 @router.get("/", response_model=List[TaskInList])
 def list_tasks(
     project_id: Optional[int] = Query(None, description="Filter tasks by project ID"),
-    status: Optional[str] = Query(None, description="Filter tasks by status (todo, in_progress, done, overdue)"),
+    status: Optional[str] = Query(None, description="Filter tasks by status (todo, doing, done)"),
     db: Session = Depends(get_db)
 ):
     """
@@ -160,8 +158,8 @@ def update_task(
     
     - **title**: New task title
     - **description**: New description
-    - **due_date**: New deadline in YYYY-MM-DD format
-    - **status**: New status (todo, in_progress, done, overdue)
+    - **deadline**: New deadline in YYYY-MM-DD format
+    - **status**: New status (todo, doing, done, overdue)
     """
     task_service = TaskService(db)
     
@@ -180,12 +178,11 @@ def update_task(
             raise HTTPException(status_code=404, detail="Project not found")
     
     try:
-        # Service expects: task_id, title, description, deadline (not due_date), status
         updated_task = task_service.update_task(
             task_id=task_id,
             title=task_data.title,
             description=task_data.description,
-            deadline=task_data.due_date.isoformat() if task_data.due_date else None,
+            deadline=task_data.deadline,
             status=task_data.status
         )
         return updated_task

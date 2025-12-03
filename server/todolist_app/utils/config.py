@@ -33,6 +33,23 @@ class Config:
     APP_NAME: str = os.getenv("APP_NAME", "ToDoList")
     APP_ENV: str = os.getenv("APP_ENV", "development")
     DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
+    API_VERSION: str = os.getenv("API_VERSION", "3.0.0")
+
+    # ========== API Server Configuration ==========
+    API_HOST: str = os.getenv("API_HOST", "0.0.0.0")
+    API_PORT: int = int(os.getenv("API_PORT", "8000"))
+
+    # ========== CORS Configuration ==========
+    CORS_ORIGINS: List[str] = [
+        origin.strip()
+        for origin in os.getenv(
+            "CORS_ORIGINS",
+            "http://localhost:3000,http://localhost:8080,http://127.0.0.1:3000"
+        ).split(",")
+    ]
+
+    # ========== Logging Configuration ==========
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
 
     # ========== Maximum Limits ==========
     MAX_NUMBER_OF_PROJECT: int = int(os.getenv("MAX_NUMBER_OF_PROJECT", "10"))
@@ -162,6 +179,89 @@ class Config:
         """
         return cls.APP_NAME
 
+    @classmethod
+    def is_development(cls) -> bool:
+        """
+        Check if running in development mode.
+
+        Returns:
+            bool: True if environment is development
+        """
+        return cls.APP_ENV.lower() == "development"
+
+    @classmethod
+    def is_production(cls) -> bool:
+        """
+        Check if running in production mode.
+
+        Returns:
+            bool: True if environment is production
+        """
+        return cls.APP_ENV.lower() == "production"
+
+    # ========== API Configuration Methods ==========
+    @classmethod
+    def get_api_host(cls) -> str:
+        """
+        Get API server host.
+
+        Returns:
+            str: API host address
+        """
+        return cls.API_HOST
+
+    @classmethod
+    def get_api_port(cls) -> int:
+        """
+        Get API server port.
+
+        Returns:
+            int: API port number
+        """
+        return cls.API_PORT
+
+    @classmethod
+    def get_api_version(cls) -> str:
+        """
+        Get API version.
+
+        Returns:
+            str: API version string
+        """
+        return cls.API_VERSION
+
+    @classmethod
+    def get_cors_origins(cls) -> List[str]:
+        """
+        Get list of allowed CORS origins.
+
+        Returns:
+            List[str]: List of allowed origins
+        """
+        return cls.CORS_ORIGINS
+
+    @classmethod
+    def get_log_level(cls) -> str:
+        """
+        Get logging level.
+
+        Returns:
+            str: Logging level (INFO, DEBUG, WARNING, ERROR, CRITICAL)
+        """
+        return cls.LOG_LEVEL
+
+    @classmethod
+    def get_api_base_url(cls) -> str:
+        """
+        Get full API base URL.
+
+        Returns:
+            str: Complete API base URL
+        """
+        protocol = "https" if cls.is_production() else "http"
+        host = cls.API_HOST if cls.API_HOST != "0.0.0.0" else "localhost"
+        return f"{protocol}://{host}:{cls.API_PORT}"
+
     # ========== Validation Limit Methods ==========
     @classmethod
     def get_project_name_limits(cls) -> tuple[int, int]:
@@ -209,23 +309,92 @@ class Config:
             cls.TASK_DESCRIPTION_MAX_WORDS,
         )
 
+    # ========== Display Methods ==========
     @classmethod
     def display_config(cls) -> None:
         """
         Display current configuration (for debugging).
         Passwords are masked for security.
         """
-        print("=" * 50)
+        print("=" * 60)
         print(f"🚀 {cls.APP_NAME} Configuration")
-        print("=" * 50)
-        print(f"Environment: {cls.APP_ENV}")
-        print(f"Debug Mode: {cls.DEBUG}")
+        print("=" * 60)
+        print(f"📌 Environment: {cls.APP_ENV}")
+        print(f"🐛 Debug Mode: {cls.DEBUG}")
+        print(f"📦 Version: {cls.API_VERSION}")
+        
+        print(f"\n🌐 API Server:")
+        print(f"  Host: {cls.API_HOST}")
+        print(f"  Port: {cls.API_PORT}")
+        print(f"  Base URL: {cls.get_api_base_url()}")
+        print(f"  Log Level: {cls.LOG_LEVEL}")
+        
+        print(f"\n🔐 CORS Origins:")
+        for origin in cls.CORS_ORIGINS:
+            print(f"  • {origin}")
+        
         print(f"\n📊 Database:")
         print(f"  Host: {cls.DB_HOST}:{cls.DB_PORT}")
         print(f"  Database: {cls.DB_NAME}")
         print(f"  User: {cls.DB_USER}")
         print(f"  Password: {'*' * len(cls.DB_PASSWORD)}")
-        print(f"\n⚙️  Limits:")
+        print(f"  URL: {cls.get_database_url()[:50]}...")
+        
+        print(f"\n⚙️  Business Limits:")
         print(f"  Max Projects: {cls.MAX_NUMBER_OF_PROJECT}")
-        print(f"  Max Tasks: {cls.MAX_NUMBER_OF_TASK}")
-        print("=" * 50)
+        print(f"  Max Tasks per Project: {cls.MAX_NUMBER_OF_TASK}")
+        
+        print(f"\n📝 Validation Limits:")
+        print(f"  Project Name: {cls.PROJECT_NAME_MIN_WORDS}-{cls.PROJECT_NAME_MAX_WORDS} words")
+        print(f"  Project Description: {cls.PROJECT_DESCRIPTION_MIN_WORDS}-{cls.PROJECT_DESCRIPTION_MAX_WORDS} words")
+        print(f"  Task Title: {cls.TASK_TITLE_MIN_WORDS}-{cls.TASK_TITLE_MAX_WORDS} words")
+        print(f"  Task Description: {cls.TASK_DESCRIPTION_MIN_WORDS}-{cls.TASK_DESCRIPTION_MAX_WORDS} words")
+        
+        print(f"\n✅ Valid Task Statuses:")
+        print(f"  {' → '.join(cls.VALID_STATUSES)}")
+        print("=" * 60)
+
+    @classmethod
+    def to_dict(cls) -> dict:
+        """
+        Convert configuration to dictionary (excluding sensitive data).
+
+        Returns:
+            dict: Configuration as dictionary with masked passwords
+        """
+        return {
+            "app": {
+                "name": cls.APP_NAME,
+                "version": cls.API_VERSION,
+                "environment": cls.APP_ENV,
+                "debug": cls.DEBUG,
+            },
+            "api": {
+                "host": cls.API_HOST,
+                "port": cls.API_PORT,
+                "base_url": cls.get_api_base_url(),
+                "cors_origins": cls.CORS_ORIGINS,
+                "log_level": cls.LOG_LEVEL,
+            },
+            "database": {
+                "host": cls.DB_HOST,
+                "port": cls.DB_PORT,
+                "name": cls.DB_NAME,
+                "user": cls.DB_USER,
+            },
+            "limits": {
+                "max_projects": cls.MAX_NUMBER_OF_PROJECT,
+                "max_tasks": cls.MAX_NUMBER_OF_TASK,
+            },
+            "validation": {
+                "project_name": cls.get_project_name_limits(),
+                "project_description": cls.get_project_description_limits(),
+                "task_title": cls.get_task_title_limits(),
+                "task_description": cls.get_task_description_limits(),
+                "valid_statuses": cls.VALID_STATUSES,
+            },
+        }
+
+
+# Create a singleton instance for convenience
+config = Config()
