@@ -19,14 +19,12 @@ class TaskStatus(enum.Enum):
     
     Attributes:
         TODO: Task is pending and not yet started
-        IN_PROGRESS: Task is currently being worked on
+        DOING: Task is currently being worked on
         DONE: Task has been completed
-        OVERDUE: Task has passed its deadline without completion
     """
     TODO = "todo"
-    IN_PROGRESS = "in_progress"
+    DOING = "doing"
     DONE = "done"
-    OVERDUE = "overdue"
 
 
 class Task(Base):

@@ -1,0 +1,162 @@
+### BASE CONFIG
+@baseUrl = http://localhost:8001/api
+@contentType = application/json
+
+
+### ============================================
+### PROJECT ENDPOINTS
+### ============================================
+
+### 1. Get all projects
+GET {{baseUrl}}/projects/
+Accept: {{contentType}}
+
+### 2. Create project
+POST {{baseUrl}}/projects/
+Content-Type: {{contentType}}
+
+{
+  "name": "Sample Project",
+  "description": "A sample project"
+}
+
+### 3. Get project by ID
+GET {{baseUrl}}/projects/11
+Accept: {{contentType}}
+
+### 4. Update project
+PUT {{baseUrl}}/projects/11
+Content-Type: {{contentType}}
+
+{
+  "name": "Updated Project",
+  "description": "Updated project description"
+}
+
+### 5. Delete project
+DELETE {{baseUrl}}/projects/10
+
+
+### ============================================
+### TASK ENDPOINTS
+### ============================================
+
+### 6. List all tasks (requires project_id)
+GET {{baseUrl}}/tasks/?project_id=11
+Accept: {{contentType}}
+
+### 7. Filter tasks by status
+GET {{baseUrl}}/tasks/?project_id=11&status=todo
+Accept: {{contentType}}
+
+### 8. Get overdue tasks
+GET {{baseUrl}}/tasks/overdue
+Accept: {{contentType}}
+
+### 9. Search tasks
+GET {{baseUrl}}/tasks/search?project_id=1&query=test
+Accept: {{contentType}}
+
+### 10. Create task
+POST {{baseUrl}}/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "New Task",
+  "description": "Task description",
+  "project_id": 11,
+  "deadline": "2020-12-20",
+  "status": "todo"
+}
+
+### 11. Get task by ID
+GET {{baseUrl}}/tasks/1
+Accept: {{contentType}}
+
+### 12. Update task
+PUT {{baseUrl}}/tasks/1
+Content-Type: {{contentType}}
+
+{
+  "status": "doing",
+  "title": "Updated title"
+}
+
+### 13. Mark task as done
+PATCH {{baseUrl}}/tasks/37/mark-done
+
+### 14. Delete task
+DELETE {{baseUrl}}/tasks/10
+
+
+### ============================================
+### ERROR TESTS
+### ============================================
+
+### 15. Missing project_id
+GET {{baseUrl}}/tasks/
+
+### 16. Invalid status
+PUT {{baseUrl}}/tasks/1
+Content-Type: {{contentType}}
+
+{
+  "status": "invalid"
+}
+
+### 17. Create task without project_id
+POST {{baseUrl}}/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "Should fail"
+}
+
+### 18. Invalid date format
+POST {{baseUrl}}/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "Bad date",
+  "project_id": 1,
+  "deadline": "not-a-date"
+}
+
+
+### ============================================
+### WORKFLOW (Compact)
+### ============================================
+
+### A. Create project
+POST {{baseUrl}}/projects/
+Content-Type: {{contentType}}
+
+{
+  "name": "Website Redesign",
+  "description": "Full redesign"
+}
+
+### B. Create task
+POST {{baseUrl}}/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "Design UI",
+  "description": "UI/UX wireframes",
+  "project_id": 1,
+  "deadline": "2025-12-10"
+}
+
+### C. Start task
+PUT {{baseUrl}}/tasks/1
+Content-Type: {{contentType}}
+
+{
+  "status": "doing"
+}
+
+### D. Complete task
+PATCH {{baseUrl}}/tasks/1/mark-done
+
+### E. Check completed tasks
+GET {{baseUrl}}/tasks/?project_id=11&status=done

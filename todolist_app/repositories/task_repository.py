@@ -143,10 +143,10 @@ class TaskRepository:
         Returns:
             List[Task]: List of overdue tasks
         """
+        now = datetime.utcnow()
         query = self.db.query(Task).filter(
-            Task.deadline < datetime.utcnow(),
-            Task.status != TaskStatus.DONE,
-            Task.status != TaskStatus.OVERDUE
+            Task.deadline < now,
+            Task.status != TaskStatus.DONE
         )
         
         if project_id is not None:
@@ -305,21 +305,6 @@ class TaskRepository:
         return self.db.query(Task).filter(
             Task.project_id == project_id
         ).count()
-
-    def get_overdue_tasks(self):
-        """
-        Returns all tasks where:
-        deadline < now AND status != DONE
-        """
-        now = datetime.utcnow()
-        return (
-            self.db.query(Task)
-            .filter(
-                Task.deadline < now,
-                Task.status != TaskStatus.DONE
-            )
-            .all()
-        )
 
     def autoclose_overdue_tasks(self) -> int:
         """

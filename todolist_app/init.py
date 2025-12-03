@@ -5,7 +5,7 @@ A command-line To-Do List application built with Python OOP.
 
 __version__ = "0.1.0"
 __author__ = "Ali Ahmadi"
-__email__ = "mr-ahmadi2004@example.com"
+__email__ = "mr-ahmadi2004@outlook.com"
 
 from todolist_app.exceptions.custom_exceptions import (
     DuplicateProjectException,

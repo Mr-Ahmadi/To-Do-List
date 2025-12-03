@@ -1,335 +1,241 @@
-# 📋 ToDoList Application
+Here is a **clean, professional, production‑style README.md** written specifically for *your exact project structure*, fully reflecting:
 
-A **CLI-based task management system** built with  
-**Python OOP**, **SQLAlchemy ORM**, **PostgreSQL**, **Docker**, and **Alembic migrations**.
+- FastAPI backend  
+- PostgreSQL + SQLAlchemy  
+- Repository/Service architecture  
+- CLI  
+- Scheduler  
+- Alembic migrations  
+- Pytest test suite  
+- No front-end client (API‑only server)  
 
-Now fully persistent — your tasks and projects are stored in a **relational database** instead of in‑memory.
-
-**NEW**: Automated overdue task closure with **scheduled commands** (via Cron or Python scheduler).
-
-[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Poetry](https://img.shields.io/badge/dependency%20management-poetry-blue)](https://python-poetry.org/)
-[![Database](https://img.shields.io/badge/database-PostgreSQL-316192.svg)](https://www.postgresql.org/)
-[![Docker](https://img.shields.io/badge/containerized-Docker-blue.svg)](https://www.docker.com/)
-[![Migrations](https://img.shields.io/badge/migrations-Alembic-yellow.svg)](https://alembic.sqlalchemy.org/)
-[![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+Everything is concise, polished, and ready for GitHub / university submission.
 
 ---
 
-## 🌟 Features
+# README.md
 
-### Project Management
+# ToDoList App (FastAPI + PostgreSQL + SQLAlchemy)
 
-- Create, read, update, delete projects  
-- Configurable maximum number of projects  
-- Word‑count validation for names/descriptions  
-- Prevent duplicate names  
-- View project summaries and progress  
+A modular, scalable **Task & Project Management API** built with **FastAPI**, **PostgreSQL**, **SQLAlchemy ORM**, and **Pydantic**.  
+Includes a full **repository–service architecture**, **CLI tools**, **scheduled background jobs**, and a complete **unit-test suite** with HTML coverage reports.
 
-### Task Management
-
-- Full CRUD operations  
-- Status workflow: `todo`, `in_progress`, `done`  
-- Optional deadlines (`YYYY-MM-DD`, validated, must be in the future)  
-- Search tasks by title/description  
-- View overdue tasks  
-- Project completion calculations  
-
-### Scheduled Task Automation ✨ **NEW**
-
-- **Automatic closure of overdue tasks**  
-- Command: `tasks:autoclose-overdue` (sets `status=done`, `closed_at=now`)  
-- Can be triggered:
-  - Manually via CLI  
-  - Automatically via Python scheduler (`schedule` library)  
-  - Automatically via Cron Job (runs every 15 minutes)
-
-### Data Validation
-
-- Word-count constraints  
-- Enum status validation  
-- Date format checking  
-- Custom exception hierarchy (base, repository, service)  
-
-### Persistence Layer
-
-- PostgreSQL relational database  
-- SQLAlchemy ORM models (`Project`, `Task`)  
-- Repository pattern (clean separation of DB from business logic)
-
-### Migrations
-
-- Alembic auto‑generation  
-- Versioned schema upgrades  
-- Easily reproducible database setup
-
-### Infrastructure
-
-- Database runs in Docker  
-- Local development uses environment variables  
-- Fully portable and OS‑independent  
+This project was developed as part of a multi‑phase backend engineering task focusing on API design, data modeling, validation, CLI tooling, and database-backed service layers.
 
 ---
 
-## 📁 Updated Project Structure
+## Features
 
-```bash
-To-Do-List/
-├── todolist_app/
-│   ├── cli/
-│   │   ├── console.py            # Interactive CLI
-│   │   └── __init__.py
-│   ├── commands/                 # CLI Commands (Click-based)
-│   │   ├── autoclose_overdue.py  # tasks:autoclose-overdue
-│   │   └── __init__.py           # Command group registration
-│   ├── scheduler/                # Scheduled task runners
-│   │   ├── autoclose_runner.py   # Runs autoclose every 15 min
-│   │   └── __init__.py
-│   ├── db/
-│   │   ├── base.py               # SQLAlchemy Base
-│   │   ├── session.py            # DB session + context manager
-│   │   └── __init__.py
-│   ├── models/                   # ORM models: Project, Task
-│   ├── repositories/             # Repository layer (TaskRepository, ProjectRepository)
-│   ├── services/                 # Business logic
-│   ├── utils/
-│   │   ├── config.py             # Reads .env + DB URL builder
-│   │   └── validators.py
-│   ├── exceptions/               # Custom exceptions
-│   └── alembic/                  # Alembic migrations
-│       ├── env.py
-│       ├── script.py.mako
-│       └── versions/
-├── docker-compose.yml            # PostgreSQL in Docker
-├── run_scheduler.sh              # Shell script for Cron execution
-├── logs/                         # Scheduler logs
-│   └── scheduler.log
-├── main.py                       # Entry point
-├── pyproject.toml
-├── .env
-├── .gitignore
-└── README.md
+### ✓ RESTful API (FastAPI)
+- CRUD for **Projects**
+- CRUD for **Tasks**
+- Status management (`todo`, `doing`, `done`)
+- Deadline validation (ISO date format)
+- List, filter, search, mark-done, overdue detection
+
+### ✓ PostgreSQL + SQLAlchemy ORM
+- Normalized relational schema  
+- Programmatic DB sessions  
+- Alembic migrations for schema evolution
+
+### ✓ Repository–Service Architecture
+Clean separation of concerns:
+
+- `repositories/` → low-level DB operations  
+- `services/` → business logic & validation  
+- `managers/` → high-level orchestration  
+- `api/routers/` → HTTP layer  
+
+### ✓ CLI Tools
+Run admin commands directly from terminal:
+
+```
+poetry run todolist --help
+```
+
+Includes:
+
+- Initialize data
+- Close overdue tasks
+- Project/task listing
+
+### ✓ Scheduler
+Automatic daily job to **autoclose overdue tasks**:
+
+```
+./run_scheduler.sh
+```
+
+### ✓ Test Suite (Pytest)
+All key layers fully tested:
+
+- Managers  
+- Services  
+- Validators  
+- CLI  
+- Config  
+
+Coverage report available in `htmlcov/`.
 
 ---
 
-## 🚀 Quick Start
+## Project Structure
 
-### 1. Prerequisites
+```
+todolist_app/
+├── api/                   # FastAPI application
+│   ├── main.py
+│   ├── routers/
+│   └── schemas/
+├── cli/                   # Command-line interface
+├── commands/              # CLI commands
+├── db/                    # Database engine, session, base ORM
+├── models/                # SQLAlchemy ORM models
+├── repositories/          # DB access layer
+├── services/              # Business logic
+├── managers/              # High-level wrappers
+├── utils/                 # Config, validators
+├── scheduler/             # Background scheduled job
+└── alembic/               # Migrations
+```
 
-- **Python 3.10+**
-- **Poetry**
-- **Docker Desktop** installed + running
+Other top-level files:
+
+```
+main.py                   # Entry point to API
+run_api.sh                # Run FastAPI server
+run_scheduler.sh          # Run scheduler
+api_tests.http            # REST client manual tests
+tests/                    # Pytest suite
+htmlcov/                  # Coverage HTML output
+docker-compose.yml        # PostgreSQL + API optional
+pyproject.toml            # Poetry config
+requirements.txt          # Pinned dependencies
+```
 
 ---
 
-### 2. Install Dependencies
+## Requirements
 
-bash
-git clone https://github.com/Mr-Ahmadi/To-Do-List.git
-cd To-Do-List
+- Python 3.12+
+- Poetry
+- PostgreSQL 14+
+- Docker (optional, for DB)
+
+---
+
+## Installation
+
+### 1) Clone the repository
+
+```
+git clone <repo-url>
+cd todolist-app
+```
+
+### 2) Install dependencies
+
+```
 poetry install
+```
 
-If you need the scheduler (for automated overdue task closure):
+### 3) Set up environment variables
 
-bash
-poetry add schedule
+Create `.env`:
 
----
+```
+DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/todolist
+MAX_PROJECTS=10
+MAX_TASKS=100
+```
 
-### 3. Setup Environment Variables
+(or use Docker + provided `docker-compose.yml`)
 
-Create a file `.env` in the project root:
+### 4) Run migrations
 
-bash
-# App
-MAX_NUMBER_OF_PROJECT=10
-MAX_NUMBER_OF_TASK=50
-
-# Database
-DB_USER=todouser
-DB_PASSWORD=todopass
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=todolist_db
+```
+poetry run alembic upgrade head
+```
 
 ---
 
-### 4. Start PostgreSQL in Docker
+## Running the API Server
 
-bash
-docker-compose up -d
+```
+./run_api.sh
+```
 
-Check DB is running:
+Equivalent:
 
-bash
-docker ps
+```
+poetry run uvicorn todolist_app.api.main:app --reload --port 8001
+```
 
----
+API available at:
 
-### 5. Run Database Migrations
+```
+http://localhost:8001/api
+```
 
-bash
-alembic upgrade head
+Interactive docs:
 
-If you change models:
-
-bash
-alembic revision --autogenerate -m "description"
-alembic upgrade head
-
----
-
-## 🎯 Run the Application
-
-### Option 1 — Interactive CLI
-
-bash
-poetry run python main.py
-
-or
-
-bash
-poetry shell
-python main.py
-
-### Option 2 — Direct Commands
-
-Run the autoclose command manually:
-
-bash
-poetry run todolist tasks:autoclose-overdue
+```
+http://localhost:8001/docs
+```
 
 ---
 
-## 📟 CLI Menu (Interactive Mode)
+## Running the Scheduler
 
+Automatic overdue cleanup:
 
-📋 ToDo List Manager
-1.  Create Project
-2.  List All Projects
-3.  Edit Project
-4.  Delete Project
-5.  Select Project
-6.  Create Task
-7.  List Tasks
-8.  Edit Task
-9.  Change Task Status
-10. Delete Task
-11. View Project Status
-0.  Exit
+```
+./run_scheduler.sh
+```
 
 ---
 
-## ⏰ Scheduled Task Automation
+## Running the CLI
 
-### What Does It Do?
+```
+poetry run todolist --help
+```
 
-The `tasks:autoclose-overdue` command automatically:
-- Finds all tasks where `deadline < now` and `status != done`
-- Sets `status = done`
-- Sets `closed_at = now()`
+Examples:
 
-### Running the Scheduler Manually
-
-bash
-poetry run python -m todolist_app.scheduler.autoclose_runner
-
-This will run the autoclose job **every 15 minutes** in a persistent loop.
+```
+poetry run todolist projects list
+poetry run todolist tasks overdue
+```
 
 ---
 
-### Setting Up Cron (Automated Execution)
+## Running Tests
 
-#### Step 1: Create the Shell Script
+```
+pytest
+```
 
-Create `run_scheduler.sh` in the project root:
+### View coverage report:
 
-bash
-#!/bin/bash
-cd /path/to/To-Do-List || exit
-POETRY_PATH=$(command -v poetry)
-$POETRY_PATH run python -m todolist_app.scheduler.autoclose_runner >> logs/scheduler.log 2>&1
-
-Replace `/path/to/To-Do-List` with your actual project path.
-
-#### Step 2: Make It Executable
-
-bash
-chmod +x run_scheduler.sh
-
-#### Step 3: Add to Cron
-
-Open crontab:
-
-bash
-crontab -e
-
-Add this line (runs every 15 minutes):
-
-bash
-*/15 * * * * /path/to/To-Do-List/run_scheduler.sh
-
-Save and exit.
-
-#### Step 4: Verify Cron is Running
-
-bash
-crontab -l
-
-Check logs:
-
-bash
-tail -f logs/scheduler.log
+```
+open htmlcov/index.html
+```
 
 ---
 
-## 🧪 Testing
+## Development Notes
 
-Run all tests:
-
-bash
-poetry run pytest -v
-
----
-
-## 🛠️ Troubleshooting
-
-### Issue: `ModuleNotFoundError: No module named 'schedule'`
-
-**Solution:**
-
-bash
-poetry add schedule
-
-### Issue: Scheduler not running via Cron
-
-**Check:**
-
-bash
-crontab -l
-cat logs/scheduler.log
-
-**Common fixes:**
-- Ensure `run_scheduler.sh` has correct path  
-- Ensure `chmod +x` was applied  
-- Check Poetry path with `which poetry`
-
-### Issue: Database connection error
-
-**Check:**
-
-bash
-docker ps
-
-If not running:
-
-bash
-docker-compose up -d
+- Validation uses Pydantic models and custom validators.
+- Fully typed with Python type hints.
+- Service layer protected with application-specific exceptions (`service_exceptions.py`).
+- Repository errors wrapped and re-raised cleanly.
+- Database access via `SessionLocal` factory.
 
 ---
 
-## 📄 License
+## License
 
-MIT License.  
-Feel free to fork, improve, and contribute!
+MIT License.
+
+---

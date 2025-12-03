@@ -72,10 +72,10 @@ class TaskService:
         Validator.validate_task_title(title)
         Validator.validate_task_description(description)
         Validator.validate_status(status)
-
+        
         # Parse and validate deadline
         deadline_dt = Validator.validate_deadline(deadline)
-
+        
         # Convert string status to TaskStatus enum
         task_status = TaskStatus(status)
 
