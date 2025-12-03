@@ -197,32 +197,14 @@ Automatic overdue cleanup:
 
 ## Running the CLI
 
-```
-poetry run todolist --help
-```
-
-Examples:
+Command:
 
 ```
-poetry run todolist projects list
-poetry run todolist tasks overdue
+poetry run todolist
 ```
 
 ---
 
-## Running Tests
-
-```
-pytest
-```
-
-### View coverage report:
-
-```
-open htmlcov/index.html
-```
-
----
 
 ## Development Notes
 
