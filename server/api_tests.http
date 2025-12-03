@@ -1,401 +1,162 @@
-### Variables
-@baseUrl = http://localhost:8001
+### BASE CONFIG
+@baseUrl = http://localhost:8001/api
 @contentType = application/json
+
 
 ### ============================================
 ### PROJECT ENDPOINTS
 ### ============================================
 
 ### 1. Get all projects
-GET {{baseUrl}}/api/projects/
+GET {{baseUrl}}/projects/
 Accept: {{contentType}}
 
-### 2. Create a new project
-POST {{baseUrl}}/api/projects/
+### 2. Create project
+POST {{baseUrl}}/projects/
 Content-Type: {{contentType}}
 
 {
-  "name": "API Test Project",
-  "description": "This project was created via REST Client"
+  "name": "Sample Project",
+  "description": "A sample project"
 }
 
-### 3. Get a specific project by ID
-GET {{baseUrl}}/api/projects/10
+### 3. Get project by ID
+GET {{baseUrl}}/projects/11
 Accept: {{contentType}}
 
-### 4. Update a project (full update)
-PUT {{baseUrl}}/api/projects/10
+### 4. Update project
+PUT {{baseUrl}}/projects/11
 Content-Type: {{contentType}}
 
 {
-  "name": "Updated Project Name",
-  "description": "This project was updated via REST Client"
+  "name": "Updated Project",
+  "description": "Updated project description"
 }
 
-### 5. Delete a project
-DELETE {{baseUrl}}/api/projects/9
+### 5. Delete project
+DELETE {{baseUrl}}/projects/10
+
 
 ### ============================================
 ### TASK ENDPOINTS
 ### ============================================
 
-### 6. Get all tasks for a specific project (project_id required)
-GET {{baseUrl}}/api/tasks/?project_id=10
+### 6. List all tasks (requires project_id)
+GET {{baseUrl}}/tasks/?project_id=11
 Accept: {{contentType}}
 
-### 7. Get tasks filtered by project and status
-GET {{baseUrl}}/api/tasks/?project_id=10&status=todo
+### 7. Filter tasks by status
+GET {{baseUrl}}/tasks/?project_id=11&status=todo
 Accept: {{contentType}}
 
-### 8. Get tasks with status filter (requires project_id)
-GET {{baseUrl}}/api/tasks/?project_id=10&status=todo
+### 8. Get overdue tasks
+GET {{baseUrl}}/tasks/overdue
 Accept: {{contentType}}
 
-### 9. Get all overdue tasks (no project filter)
-GET {{baseUrl}}/api/tasks/overdue
+### 9. Search tasks
+GET {{baseUrl}}/tasks/search?project_id=1&query=test
 Accept: {{contentType}}
 
-### 10. Get overdue tasks for specific project
-GET {{baseUrl}}/api/tasks/overdue?project_id=10
-Accept: {{contentType}}
-
-### 11. Search tasks in a project
-GET {{baseUrl}}/api/tasks/search?project_id=4&query=test
-Accept: {{contentType}}
-
-### 12. Create a task (basic - project_id required)
-POST {{baseUrl}}/api/tasks/
+### 10. Create task
+POST {{baseUrl}}/tasks/
 Content-Type: {{contentType}}
 
 {
-  "title": "My Task",
+  "title": "New Task",
   "description": "Task description",
-  "project_id": 10,
-  "status": "todo",
-  "deadline": "2025-12-10"
-}
-
-### 13. Create a task with due date
-POST {{baseUrl}}/api/tasks/
-Content-Type: {{contentType}}
-
-{
-  "description": "Write API documentation",
-  "deadline": "2025-12-10",
-  "project_id": 4,
-  "status": "todo",
-  "title": "Complete project documentation"
-}
-
-### 14. Create a task with all optional fields
-POST {{baseUrl}}/api/tasks/
-Content-Type: {{contentType}}
-
-{
-  "title": "Complete Task Example",
-  "description": "Task with all possible fields filled",
-  "project_id": 4,
-  "deadline": "2025-12-20",
+  "project_id": 11,
+  "deadline": "2020-12-20",
   "status": "todo"
 }
 
-### 15. Get a specific task by ID
-GET {{baseUrl}}/api/tasks/10
+### 11. Get task by ID
+GET {{baseUrl}}/tasks/1
 Accept: {{contentType}}
 
-### 16. Update a task - partial update (only status)
-PUT {{baseUrl}}/api/tasks/34
+### 12. Update task
+PUT {{baseUrl}}/tasks/1
 Content-Type: {{contentType}}
 
 {
-  "status": "done"
+  "status": "doing",
+  "title": "Updated title"
 }
 
-### 17. Update a task - change title and description
-PUT {{baseUrl}}/api/tasks/34
-Content-Type: {{contentType}}
+### 13. Mark task as done
+PATCH {{baseUrl}}/tasks/37/mark-done
 
-{
-  "title": "Updated Task Title",
-  "description": "Updated description with more details"
-}
+### 14. Delete task
+DELETE {{baseUrl}}/tasks/10
 
-### 18. Update a task - full update with all fields
-PUT {{baseUrl}}/api/tasks/34
-Content-Type: {{contentType}}
-
-{
-  "title": "Fully Updated Task",
-  "description": "All fields have been updated",
-  "deadline": "2025-12-25",
-  "status": "todo",
-  "priority": 5
-}
-
-### 19. Mark a task as done (quick action)
-PATCH {{baseUrl}}/api/tasks/34/mark-done
-Accept: {{contentType}}
-
-### 20. Delete a task
-DELETE {{baseUrl}}/api/tasks/2
 
 ### ============================================
-### ERROR HANDLING TESTS
+### ERROR TESTS
 ### ============================================
 
-### 21. Try to get non-existent project
-GET {{baseUrl}}/api/projects/99999
-Accept: {{contentType}}
+### 15. Missing project_id
+GET {{baseUrl}}/tasks/
 
-### 22. Try to get non-existent task
-GET {{baseUrl}}/api/tasks/99999
-Accept: {{contentType}}
-
-### 23. Try to create task without required project_id
-POST {{baseUrl}}/api/tasks/
+### 16. Invalid status
+PUT {{baseUrl}}/tasks/1
 Content-Type: {{contentType}}
 
 {
-  "title": "Task without project",
-  "description": "This should fail - no project_id"
+  "status": "invalid"
 }
 
-### 24. Try to create task with invalid project_id
-POST {{baseUrl}}/api/tasks/
+### 17. Create task without project_id
+POST {{baseUrl}}/tasks/
 Content-Type: {{contentType}}
 
 {
-  "title": "Task with invalid project",
-  "description": "This should fail - project doesn't exist",
-  "project_id": 99999
+  "title": "Should fail"
 }
 
-### 25. Try to create project with missing required name
-POST {{baseUrl}}/api/projects/
+### 18. Invalid date format
+POST {{baseUrl}}/tasks/
 Content-Type: {{contentType}}
 
 {
-  "description": "Missing name field - should fail"
-}
-
-### 26. Try to create task with invalid date format
-POST {{baseUrl}}/api/tasks/
-Content-Type: {{contentType}}
-
-{
-  "title": "Invalid Date Task",
-  "description": "Bad date format",
+  "title": "Bad date",
   "project_id": 1,
-  "deadline": "invalid-date"
+  "deadline": "not-a-date"
 }
 
-### 27. Try to list tasks without project_id (should fail)
-GET {{baseUrl}}/api/tasks/
-Accept: {{contentType}}
-
-### 28. Try to filter by status without project_id (should fail)
-GET {{baseUrl}}/api/tasks/?status=todo
-Accept: {{contentType}}
 
 ### ============================================
-### WORKFLOW TESTS - Complete Use Case
+### WORKFLOW (Compact)
 ### ============================================
 
-### STEP 1: Create a new project
-POST {{baseUrl}}/api/projects/
+### A. Create project
+POST {{baseUrl}}/projects/
 Content-Type: {{contentType}}
 
 {
   "name": "Website Redesign",
-  "description": "Complete redesign of company website"
+  "description": "Full redesign"
 }
 
-###
-# Note: Use the project ID from the response above in the following requests
-# Replace {project_id} with actual ID (e.g., 1, 2, 3...)
-
-### STEP 2: Create first task - Design phase
-POST {{baseUrl}}/api/tasks/
+### B. Create task
+POST {{baseUrl}}/tasks/
 Content-Type: {{contentType}}
 
 {
-  "title": "Create Wireframes",
-  "description": "Design wireframes for all main pages",
-  "project_id": 10,
-  "deadline": "2020-12-10",
-  "status": "todo",
-  "priority": 5
-}
-
-### STEP 3: Create second task - Development phase
-POST {{baseUrl}}/api/tasks/
-Content-Type: {{contentType}}
-
-{
-  "title": "Develop Homepage",
-  "description": "Implement homepage based on approved designs",
+  "title": "Design UI",
+  "description": "UI/UX wireframes",
   "project_id": 1,
-  "deadline": "2025-12-15",
-  "status": "todo",
-  "priority": 4
+  "deadline": "2025-12-10"
 }
 
-### STEP 4: Create third task - Testing phase
-POST {{baseUrl}}/api/tasks/
+### C. Start task
+PUT {{baseUrl}}/tasks/1
 Content-Type: {{contentType}}
 
 {
-  "title": "User Testing",
-  "description": "Conduct user testing sessions",
-  "project_id": 3,
-  "deadline": "2025-12-20",
-  "status": "todo",
-  "priority": 3
+  "status": "doing"
 }
 
-### STEP 5: View all tasks for the project
-GET {{baseUrl}}/api/tasks/?project_id=10
-Accept: {{contentType}}
+### D. Complete task
+PATCH {{baseUrl}}/tasks/1/mark-done
 
-### STEP 6: Start working on first task
-PUT {{baseUrl}}/api/tasks/34
-Content-Type: {{contentType}}
-
-{
-  "status": "in_progress"
-}
-
-### STEP 7: Complete the first task
-PATCH {{baseUrl}}/api/tasks/1/mark-done
-Accept: {{contentType}}
-
-### STEP 8: View only completed tasks
-GET {{baseUrl}}/api/tasks/?project_id=1&status=done
-Accept: {{contentType}}
-
-### STEP 9: View only in-progress tasks
-GET {{baseUrl}}/api/tasks/?project_id=1&status=in_progress
-Accept: {{contentType}}
-
-### STEP 10: View only todo tasks
-GET {{baseUrl}}/api/tasks/?project_id=1&status=todo
-Accept: {{contentType}}
-
-### STEP 11: Search for tasks with "design" keyword
-GET {{baseUrl}}/api/tasks/search?project_id=1&query=design
-Accept: {{contentType}}
-
-### STEP 12: Check for overdue tasks
-GET {{baseUrl}}/api/tasks/overdue?project_id=10
-Accept: {{contentType}}
-
-### STEP 13: Update project with more details
-PUT {{baseUrl}}/api/projects/1
-Content-Type: {{contentType}}
-
-{
-  "name": "Website Redesign 2025",
-  "description": "Complete redesign of company website - Q4 2025 launch"
-}
-
-### STEP 14: Get updated project details
-GET {{baseUrl}}/api/projects/1
-Accept: {{contentType}}
-
-### STEP 15: Update task priority
-PUT {{baseUrl}}/api/tasks/2
-Content-Type: {{contentType}}
-
-{
-  "priority": 5,
-  "status": "in_progress"
-}
-
-### STEP 16: Extend task deadline
-PUT {{baseUrl}}/api/tasks/3
-Content-Type: {{contentType}}
-
-{
-  "deadline": "2025-12-25"
-}
-
-### ============================================
-### VALIDATION TESTS
-### ============================================
-
-### 29. Create task with empty title (should fail)
-POST {{baseUrl}}/api/tasks/
-Content-Type: {{contentType}}
-
-{
-  "title": "",
-  "description": "Task with empty title",
-  "project_id": 1
-}
-
-### 30. Create project with empty name (should fail)
-POST {{baseUrl}}/api/projects/
-Content-Type: {{contentType}}
-
-{
-  "name": "",
-  "description": "Project with empty name"
-}
-
-### 31. Update task with invalid status value
-PUT {{baseUrl}}/api/tasks/34
-Content-Type: {{contentType}}
-
-{
-  "status": "done"
-}
-
-### 32. Create task with past due date (should still work)
-POST {{baseUrl}}/api/tasks/
-Content-Type: {{contentType}}
-
-{
-  "title": "Overdue Task Test",
-  "description": "This task has a past deadline",
-  "project_id": 1,
-  "deadline": "2020-01-01"
-}
-
-### ============================================
-### BULK OPERATIONS
-### ============================================
-
-### 33. Create multiple tasks in sequence
-# Task 1
-POST {{baseUrl}}/api/tasks/
-Content-Type: {{contentType}}
-
-{
-  "title": "Research Phase",
-  "description": "Market research and competitor analysis",
-  "project_id": 1,
-}
-
-### Task 2
-POST {{baseUrl}}/api/tasks/
-Content-Type: {{contentType}}
-
-{
-  "title": "Planning Phase",
-  "description": "Create detailed project plan",
-  "project_id": 1,
-}
-
-### Task 3
-POST {{baseUrl}}/api/tasks/
-Content-Type: {{contentType}}
-
-{
-  "title": "Execution Phase",
-  "description": "Implement the planned features",
-  "project_id": 1,
-}
-
-### 34. View all tasks to verify bulk creation
-GET {{baseUrl}}/api/tasks/?project_id=10
-Accept: {{contentType}}
+### E. Check completed tasks
+GET {{baseUrl}}/tasks/?project_id=11&status=done
