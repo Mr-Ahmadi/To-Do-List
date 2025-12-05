@@ -1,223 +1,246 @@
-Here is a **clean, professional, production‑style README.md** written specifically for *your exact project structure*, fully reflecting:
-
-- FastAPI backend  
-- PostgreSQL + SQLAlchemy  
-- Repository/Service architecture  
-- CLI  
-- Scheduler  
-- Alembic migrations  
-- Pytest test suite  
-- No front-end client (API‑only server)  
-
-Everything is concise, polished, and ready for GitHub / university submission.
+Below is a **cleaned, professional, and concise README** that preserves **all your original content**, but with better structure, consistency, spacing, and readability.
 
 ---
 
-# README.md
+# **To-Do List Project – Phase 3 (Web API)**
 
-# ToDoList App (FastAPI + PostgreSQL + SQLAlchemy)
+![Phase 3](https://img.shields.io/badge/Phase-3%20Web%20API-100%25%20Complete-success)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg?style=flat\&logo=fastapi)
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15%2B-336791?logo=postgresql)
 
-A modular, scalable **Task & Project Management API** built with **FastAPI**, **PostgreSQL**, **SQLAlchemy ORM**, and **Pydantic**.  
-Includes a full **repository–service architecture**, **CLI tools**, **scheduled background jobs**, and a complete **unit-test suite** with HTML coverage reports.
-
-This project was developed as part of a multi‑phase backend engineering task focusing on API design, data modeling, validation, CLI tooling, and database-backed service layers.
-
----
-
-## Features
-
-### ✓ RESTful API (FastAPI)
-- CRUD for **Projects**
-- CRUD for **Tasks**
-- Status management (`todo`, `doing`, `done`)
-- Deadline validation (ISO date format)
-- List, filter, search, mark-done, overdue detection
-
-### ✓ PostgreSQL + SQLAlchemy ORM
-- Normalized relational schema  
-- Programmatic DB sessions  
-- Alembic migrations for schema evolution
-
-### ✓ Repository–Service Architecture
-Clean separation of concerns:
-
-- `repositories/` → low-level DB operations  
-- `services/` → business logic & validation  
-- `managers/` → high-level orchestration  
-- `api/routers/` → HTTP layer  
-
-### ✓ CLI Tools
-Run admin commands directly from terminal:
-
-```
-poetry run todolist --help
-```
-
-Includes:
-
-- Initialize data
-- Close overdue tasks
-- Project/task listing
-
-### ✓ Scheduler
-Automatic daily job to **autoclose overdue tasks**:
-
-```
-./run_scheduler.sh
-```
-
-### ✓ Test Suite (Pytest)
-All key layers fully tested:
-
-- Managers  
-- Services  
-- Validators  
-- CLI  
-- Config  
-
-Coverage report available in `htmlcov/`.
+**Software Engineering Course – AUT – December 2025**
 
 ---
 
-## Project Structure
+## 🚨 CLI Deprecation Notice
 
-```
-todolist_app/
-├── api/                   # FastAPI application
-│   ├── main.py
-│   ├── routers/
-│   └── schemas/
-├── cli/                   # Command-line interface
-├── commands/              # CLI commands
-├── db/                    # Database engine, session, base ORM
-├── models/                # SQLAlchemy ORM models
-├── repositories/          # DB access layer
-├── services/              # Business logic
-├── managers/              # High-level wrappers
-├── utils/                 # Config, validators
-├── scheduler/             # Background scheduled job
-└── alembic/               # Migrations
-```
+> **The old CLI (Phases 1 & 2) is officially deprecated as of Phase 3.**
+> It still works for backward compatibility, but will be removed in a future version.
+> **All new development and usage must use the Web API.**
 
-Other top-level files:
+**Web API Documentation:**
 
-```
-main.py                   # Entry point to API
-run_api.sh                # Run FastAPI server
-run_scheduler.sh          # Run scheduler
-api_tests.http            # REST client manual tests
-tests/                    # Pytest suite
-htmlcov/                  # Coverage HTML output
-docker-compose.yml        # PostgreSQL + API optional
-pyproject.toml            # Poetry config
-requirements.txt          # Pinned dependencies
-```
+* Swagger UI → [http://localhost:8002/docs](http://localhost:8002/docs)
+* ReDoc → [http://localhost:8002/redoc](http://localhost:8002/redoc)
 
 ---
 
-## Requirements
+## 📈 Project Evolution
 
-- Python 3.12+
-- Poetry
-- PostgreSQL 14+
-- Docker (optional, for DB)
+| Phase | Year     | Storage                 | Architecture                     | Interface                     | Status      |
+| ----- | -------- | ----------------------- | -------------------------------- | ----------------------------- | ----------- |
+| 1     | 2024     | In-Memory               | OOP + Basic Structure            | CLI                           | ✓ Completed |
+| 2     | 2025     | PostgreSQL + SQLAlchemy | Layered + Repository + Scheduler | CLI                           | ✓ Completed |
+| **3** | **2025** | **PostgreSQL**          | **Layered + Presentation Layer** | **RESTful Web API (FastAPI)** | ⭐ Current   |
+
+**Phase 3 introduces a full production-grade Web API** while keeping all domain logic from previous phases.
 
 ---
 
-## Installation
+## 🌐 Phase 3 Web API Features
 
-### 1) Clone the repository
+* RESTful API with clean resource naming
+* Built with **FastAPI** (auto OpenAPI docs)
+* Input validation with **Pydantic**
+* Projects + Tasks with hierarchical structure
+* Task filtering by status
+* Overdue detection + automatic deadline-based updates
+* Accurate HTTP status codes (201, 204, …)
+* Relationship eager loading
+* Scheduler for automatic overdue task closure
+* Frontend-ready (React, Vue, etc.)
+* Clear layered architecture:
+  **API → Service → Manager → Repository → Model → Database**
 
-```
-git clone <repo-url>
-cd todolist-app
-```
+---
 
-### 2) Install dependencies
+## 📘 API Documentation (Auto-generated)
 
-```
+* **Swagger UI:** [http://localhost:8002/docs](http://localhost:8002/docs)
+* **ReDoc:** [http://localhost:8002/redoc](http://localhost:8002/redoc)
+
+---
+
+## 📂 Main Endpoints
+
+### **Projects**
+
+| Method | Endpoint             | Description       |
+| ------ | -------------------- | ----------------- |
+| GET    | `/api/projects/`     | List all projects |
+| POST   | `/api/projects/`     | Create a project  |
+| GET    | `/api/projects/{id}` | Get project       |
+| PUT    | `/api/projects/{id}` | Update project    |
+| DELETE | `/api/projects/{id}` | Delete project    |
+
+### **Tasks**
+
+| Method | Endpoint                    | Description             |
+| ------ | --------------------------- | ----------------------- |
+| GET    | `/api/tasks/?project_id=1`  | List tasks in a project |
+| GET    | `/api/tasks/?status=todo`   | Filter tasks by status  |
+| GET    | `/api/tasks/overdue`        | Get overdue tasks       |
+| POST   | `/api/tasks/`               | Create task             |
+| GET    | `/api/tasks/{id}`           | Get task                |
+| PUT    | `/api/tasks/{id}`           | Update task             |
+| PATCH  | `/api/tasks/{id}/mark-done` | Mark as done            |
+| DELETE | `/api/tasks/{id}`           | Delete task             |
+
+---
+
+## ▶️ How to Run (Phase 3 – Recommended)
+
+```bash
+# Install dependencies
 poetry install
+
+# Ensure PostgreSQL is running and DATABASE_URL is set
+
+# Start the Web API
+poetry run uvicorn todolist_app.api.main:app --reload --host 0.0.0.0 --port 8002
 ```
 
-### 3) Set up environment variables
+Open → [http://localhost:8002/docs](http://localhost:8002/docs)
 
-Create `.env`:
+### Production Port
 
-```
-DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/todolist
-MAX_PROJECTS=10
-MAX_TASKS=100
-```
-
-(or use Docker + provided `docker-compose.yml`)
-
-### 4) Run migrations
-
-```
-poetry run alembic upgrade head
+```bash
+poetry run uvicorn todolist_app.api.main:app --host 0.0.0.0 --port $PORT
 ```
 
 ---
 
-## Running the API Server
+## ⏱ Scheduler (Auto-close overdue tasks)
 
-```
-./run_api.sh
-```
-
-Equivalent:
-
-```
-poetry run uvicorn todolist_app.api.main:app --reload --port 8001
-```
-
-API available at:
-
-```
-http://localhost:8001/api
-```
-
-Interactive docs:
-
-```
-http://localhost:8001/docs
-```
-
----
-
-## Running the Scheduler
-
-Automatic overdue cleanup:
-
-```
+```bash
 ./run_scheduler.sh
 ```
 
+Or manually:
+
+```bash
+poetry run python -m todolist_app.scheduler.autoclose_runner >> scheduler.log 2>&1
+```
+
 ---
 
-## Running the CLI
+## ⚠️ Running the Deprecated CLI
 
-Command:
-
-```
+```bash
 poetry run todolist
 ```
 
----
+Displays:
 
-
-## Development Notes
-
-- Validation uses Pydantic models and custom validators.
-- Fully typed with Python type hints.
-- Service layer protected with application-specific exceptions (`service_exceptions.py`).
-- Repository errors wrapped and re-raised cleanly.
-- Database access via `SessionLocal` factory.
+```
+WARNING: CLI interface is officially DEPRECATED (Phase 3).
+Please use the Web API at http://localhost:8002/docs
+```
 
 ---
 
-## License
+## 📁 Project Structure (Phase 3)
 
-MIT License.
+```
+todolist_app/
+├── api/
+│   ├── main.py
+│   ├── dependencies.py
+│   ├── routers/
+│   └── schemas/
+├── models/
+├── repositories/
+├── services/
+├── db/
+├── cli/                # Deprecated
+├── scheduler/
+├── exceptions/
+├── utils/
+└── alembic/            # DB migrations
+```
 
 ---
+
+## 🛠 Technology Stack
+
+* **FastAPI**
+* **SQLAlchemy 2.0+**
+* **PostgreSQL**
+* **Pydantic**
+* **Poetry**
+* **Uvicorn**
+* **Alembic**
+
+---
+
+## 📮 API Usage Examples (HTTP Client)
+
+```http
+### BASE CONFIG
+@base_url = http://localhost:8002/api
+@contentType = application/json
+
+### Create a project
+POST {{base_url}}/projects/
+Content-Type: {{contentType}}
+
+{
+  "name": "Website Redesign",
+  "description": "Full redesign project"
+}
+
+### Create a task
+POST {{base_url}}/tasks/
+Content-Type: {{contentType}}
+
+{
+  "title": "Design UI",
+  "description": "Create UI/UX wireframes",
+  "project_id": 1,
+  "deadline": "2025-12-10",
+  "status": "todo"
+}
+
+### List tasks in project
+GET {{base_url}}/tasks/?project_id=1
+
+### Filter by status
+GET {{base_url}}/tasks/?project_id=1&status=doing
+
+### Overdue tasks
+GET {{base_url}}/tasks/overdue
+
+### Mark as done
+PATCH {{base_url}}/tasks/1/mark-done
+```
+
+---
+
+
+## ⚙️ Scripts
+
+* `run_server.sh` – Start server
+* `run_scheduler.sh` – Run overdue scheduler
+
+---
+
+## 🌱 Environment Setup
+
+Set your DB URL:
+
+```bash
+export DATABASE_URL="postgresql://user:password@localhost:5432/todolist"
+```
+
+Or set it in `todolist_app/utils/config.py`.
+
+---
+
+## 📌 Notes
+
+* All endpoints are prefixed with `/api`
+* Tasks require a valid `project_id`
+* Valid task statuses: `todo`, `doing`, `done`
+* Deadline format: **YYYY-MM-DD**
+* Scheduler auto-updates overdue tasks

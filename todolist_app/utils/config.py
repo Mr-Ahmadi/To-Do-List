@@ -23,43 +23,42 @@ class Config:
     """
 
     # ========== Database Configuration ==========
-    DB_USER: str = os.getenv("DB_USER", "todouser")
-    DB_PASSWORD: str = os.getenv("DB_PASSWORD", "todopass")
-    DB_NAME: str = os.getenv("DB_NAME", "todolist_db")
-    DB_HOST: str = os.getenv("DB_HOST", "localhost")
-    DB_PORT: str = os.getenv("DB_PORT", "5432")
+    DB_USER: str = os.getenv("DB_USER")
+    DB_PASSWORD: str = os.getenv("DB_PASSWORD")
+    DB_NAME: str = os.getenv("DB_NAME")
+    DB_HOST: str = os.getenv("DB_HOST")
+    DB_PORT: str = os.getenv("DB_PORT")
 
     # ========== Application Settings ==========
-    APP_NAME: str = os.getenv("APP_NAME", "ToDoList")
-    APP_ENV: str = os.getenv("APP_ENV", "development")
+    APP_NAME: str = os.getenv("APP_NAME")
+    APP_ENV: str = os.getenv("APP_ENV")
     DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
-    API_VERSION: str = os.getenv("API_VERSION", "3.0.0")
+    API_VERSION: str = os.getenv("API_VERSION")
 
     # ========== API Server Configuration ==========
-    API_HOST: str = os.getenv("API_HOST", "0.0.0.0")
-    API_PORT: int = int(os.getenv("API_PORT", "8000"))
+    API_HOST: str = os.getenv("API_HOST")
+    API_PORT: int = int(os.getenv("API_PORT"))
 
     # ========== CORS Configuration ==========
     CORS_ORIGINS: List[str] = [
         origin.strip()
         for origin in os.getenv(
             "CORS_ORIGINS",
-            "http://localhost:3000,http://localhost:8080,http://127.0.0.1:3000"
         ).split(",")
     ]
 
     # ========== Logging Configuration ==========
-    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL").upper()
 
     # ========== Maximum Limits ==========
-    MAX_NUMBER_OF_PROJECT: int = int(os.getenv("MAX_NUMBER_OF_PROJECT", "10"))
-    MAX_NUMBER_OF_TASK: int = int(os.getenv("MAX_NUMBER_OF_TASK", "50"))
+    MAX_NUMBER_OF_PROJECT: int = int(os.getenv("MAX_NUMBER_OF_PROJECT"))
+    MAX_NUMBER_OF_TASK: int = int(os.getenv("MAX_NUMBER_OF_TASK"))
 
     # ========== Word Count Limits for Validation ==========
     # Project validation
     PROJECT_NAME_MIN_WORDS: int = 1
     PROJECT_NAME_MAX_WORDS: int = 30
-    PROJECT_DESCRIPTION_MIN_WORDS: int = 0  # Optional
+    PROJECT_DESCRIPTION_MIN_WORDS: int = 0 
     PROJECT_DESCRIPTION_MAX_WORDS: int = 150
 
     # Task validation
@@ -74,22 +73,6 @@ class Config:
     # ========== Database Methods ==========
     @classmethod
     def get_database_url(cls, sync: bool = True) -> str:
-        """
-        Get PostgreSQL database connection URL.
-
-        Args:
-            sync (bool): If True, returns synchronous URL (postgresql://)
-                        If False, returns async URL (postgresql+asyncpg://)
-
-        Returns:
-            str: Database connection URL
-
-        Examples:
-            >>> Config.get_database_url()
-            'postgresql://todouser:todopass@localhost:5432/todolist_db'
-            >>> Config.get_database_url(sync=False)
-            'postgresql+asyncpg://todouser:todopass@localhost:5432/todolist_db'
-        """
         # Check if DATABASE_URL is explicitly set
         database_url = os.getenv("DATABASE_URL")
         if database_url:

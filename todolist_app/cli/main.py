@@ -37,7 +37,7 @@ class TodoListCLI:
         Displays the main menu and handles user input until exit.
         """
         print("=" * 60)
-        print("Welcome to ToDoList Application (Database Edition)".center(60))
+        print("Welcome to ToDoList Application (Deprecated)".center(60))
         print("=" * 60)
         print()
 

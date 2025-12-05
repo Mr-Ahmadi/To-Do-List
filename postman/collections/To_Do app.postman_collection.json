@@ -1,0 +1,297 @@
+{
+	"info": {
+		"_postman_id": "128b59c5-1b51-49ca-878b-5ae7658e16a2",
+		"name": "To_Do app",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "8527375"
+	},
+	"item": [
+		{
+			"name": "Create Project",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Sample Project Postman\",\n  \"description\": \"A sample project\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/projects/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"projects",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Projects",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/projects/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"projects",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Project By ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/projects/11",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"projects",
+						"11"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Project",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Updated Project\",\n  \"description\": \"Updated project description\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/projects/11",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"projects",
+						"11"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete project",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/projects/10",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"projects",
+						"10"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List All Tasks",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/tasks/?project_id=11",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"tasks",
+						""
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "11"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Filter Tasks By Status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/tasks/?project_id=11&status=todo",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"tasks",
+						""
+					],
+					"query": [
+						{
+							"key": "project_id",
+							"value": "11"
+						},
+						{
+							"key": "status",
+							"value": "todo"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Overdue Tasks",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/tasks/overdue",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"tasks",
+						"overdue"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Task",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"title\": \"New Task\",\n  \"description\": \"Task description\",\n  \"project_id\": 11,\n  \"deadline\": \"2020-12-20\",\n  \"status\": \"todo\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/tasks/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"tasks",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Task By ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/tasks/1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"tasks",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Task",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"status\": \"doing\",\n  \"title\": \"Updated title\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/tasks/1",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"tasks",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Mark Task As Done",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/tasks/37/mark-done",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"tasks",
+						"37",
+						"mark-done"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Task",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/tasks/10",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"tasks",
+						"10"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
